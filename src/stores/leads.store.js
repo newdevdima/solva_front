@@ -1,0 +1,255 @@
+import { ref, reactive, computed } from 'vue'
+import { defineStore } from 'pinia'
+import { leadsApi } from '@/api/leads'
+
+export const useLeadsStore = defineStore('leads', () => {
+  const list = ref([])
+  const current = ref(null)
+  const notes = ref([])
+  const statusHistory = ref([])
+  const assignmentHistory = ref([])
+
+  const meta = ref({ total: 0, per_page: 15, current_page: 1, last_page: 1 })
+
+  const filters = reactive({
+    search: '',
+    status: '',
+    insurance_type: '',
+    source_id: '',
+    assigned_to: '',
+    from: '',
+    to: '',
+    page: 1,
+    per_page: 15,
+    sort_by: 'created_at',
+    sort_dir: 'desc',
+  })
+
+  const loading = reactive({
+    list: false,
+    detail: false,
+    form: false,
+    notes: false,
+    history: false,
+    action: false,
+  })
+
+  const errors = ref(null)
+
+  const activeFiltersCount = computed(() => {
+    const { search, status, insurance_type, source_id, assigned_to, from, to } = filters
+    return [search, status, insurance_type, source_id, assigned_to, from, to].filter(Boolean).length
+  })
+
+  async function fetchList() {
+    loading.list = true
+    errors.value = null
+    try {
+      const { data, meta: m } = await leadsApi.list(_buildParams())
+      list.value = data
+      if (m) meta.value = m
+    } catch (e) {
+      errors.value = e
+    } finally {
+      loading.list = false
+    }
+  }
+
+  async function fetchOne(id) {
+    loading.detail = true
+    errors.value = null
+    try {
+      const { data } = await leadsApi.get(id)
+      current.value = data
+    } catch (e) {
+      errors.value = e
+      throw e
+    } finally {
+      loading.detail = false
+    }
+  }
+
+  async function create(payload) {
+    loading.form = true
+    errors.value = null
+    try {
+      const { data } = await leadsApi.create(payload)
+      list.value.unshift(data)
+      return data
+    } catch (e) {
+      errors.value = e
+      throw e
+    } finally {
+      loading.form = false
+    }
+  }
+
+  async function update(id, payload) {
+    loading.form = true
+    errors.value = null
+    try {
+      const { data } = await leadsApi.update(id, payload)
+      current.value = data
+      const idx = list.value.findIndex((l) => l.id === id)
+      if (idx !== -1) list.value[idx] = data
+      return data
+    } catch (e) {
+      errors.value = e
+      throw e
+    } finally {
+      loading.form = false
+    }
+  }
+
+  async function remove(id) {
+    loading.action = true
+    try {
+      await leadsApi.remove(id)
+      list.value = list.value.filter((l) => l.id !== id)
+      if (current.value?.id === id) current.value = null
+    } catch (e) {
+      errors.value = e
+      throw e
+    } finally {
+      loading.action = false
+    }
+  }
+
+  async function assign(id, assignedTo) {
+    loading.action = true
+    try {
+      const { data } = await leadsApi.assign(id, assignedTo)
+      if (current.value?.id === id) current.value = data
+      const idx = list.value.findIndex((l) => l.id === id)
+      if (idx !== -1) list.value[idx] = data
+      return data
+    } catch (e) {
+      errors.value = e
+      throw e
+    } finally {
+      loading.action = false
+    }
+  }
+
+  async function updateStatus(id, status, comment) {
+    loading.action = true
+    try {
+      const { data } = await leadsApi.updateStatus(id, status, comment)
+      if (current.value?.id === id) current.value = data
+      const idx = list.value.findIndex((l) => l.id === id)
+      if (idx !== -1) list.value[idx] = data
+      return data
+    } catch (e) {
+      errors.value = e
+      throw e
+    } finally {
+      loading.action = false
+    }
+  }
+
+  async function fetchNotes(leadId) {
+    loading.notes = true
+    try {
+      const { data } = await leadsApi.notes.list(leadId)
+      notes.value = data
+    } catch (e) {
+      errors.value = e
+    } finally {
+      loading.notes = false
+    }
+  }
+
+  async function addNote(leadId, note) {
+    loading.notes = true
+    try {
+      const { data } = await leadsApi.notes.create(leadId, note)
+      notes.value.unshift(data)
+      return data
+    } catch (e) {
+      errors.value = e
+      throw e
+    } finally {
+      loading.notes = false
+    }
+  }
+
+  async function fetchStatusHistory(leadId) {
+    loading.history = true
+    try {
+      const { data } = await leadsApi.statusHistory(leadId)
+      statusHistory.value = data
+    } catch (e) {
+      errors.value = e
+    } finally {
+      loading.history = false
+    }
+  }
+
+  async function fetchAssignmentHistory(leadId) {
+    loading.history = true
+    try {
+      const { data } = await leadsApi.assignmentHistory(leadId)
+      assignmentHistory.value = data
+    } catch (e) {
+      errors.value = e
+    } finally {
+      loading.history = false
+    }
+  }
+
+  function setFilter(key, value) {
+    filters[key] = value
+    if (key !== 'page') filters.page = 1
+    fetchList()
+  }
+
+  function resetFilters() {
+    Object.assign(filters, {
+      search: '',
+      status: '',
+      insurance_type: '',
+      source_id: '',
+      assigned_to: '',
+      from: '',
+      to: '',
+      page: 1,
+      sort_by: 'created_at',
+      sort_dir: 'desc',
+    })
+    fetchList()
+  }
+
+  function _buildParams() {
+    const p = {}
+    Object.entries(filters).forEach(([k, v]) => {
+      if (v !== '' && v !== null && v !== undefined) p[k] = v
+    })
+    return p
+  }
+
+  return {
+    list,
+    current,
+    notes,
+    statusHistory,
+    assignmentHistory,
+    meta,
+    filters,
+    loading,
+    errors,
+    activeFiltersCount,
+    fetchList,
+    fetchOne,
+    create,
+    update,
+    remove,
+    assign,
+    updateStatus,
+    fetchNotes,
+    addNote,
+    fetchStatusHistory,
+    fetchAssignmentHistory,
+    setFilter,
+    resetFilters,
+  }
+})

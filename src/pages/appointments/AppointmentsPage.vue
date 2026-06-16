@@ -1,0 +1,260 @@
+<script setup>
+import { onMounted, computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { Plus, Filter, X, Calendar } from 'lucide-vue-next'
+import { useAppointmentsStore } from '@/stores/appointments.store'
+import { useUiStore } from '@/stores/ui.store'
+import { useToast } from '@/composables/useToast'
+import AppCard from '@/components/base/AppCard.vue'
+import AppButton from '@/components/base/AppButton.vue'
+import AppTable from '@/components/base/AppTable.vue'
+import AppPagination from '@/components/base/AppPagination.vue'
+import AppSearchInput from '@/components/base/AppSearchInput.vue'
+import AppSelect from '@/components/base/AppSelect.vue'
+import AppBadge from '@/components/base/AppBadge.vue'
+import AppAvatar from '@/components/base/AppAvatar.vue'
+import AppInput from '@/components/base/AppInput.vue'
+import AppointmentStatusBadge from '@/components/modules/appointments/AppointmentStatusBadge.vue'
+import { APPOINTMENT_STATUS_OPTIONS } from '@/utils/enums'
+import { formatDateTime, formatDate } from '@/utils/formatters'
+
+const router = useRouter()
+const store = useAppointmentsStore()
+const ui = useUiStore()
+const toast = useToast()
+
+const showFilters = ref(false)
+
+const COLUMNS = [
+  { key: 'lead', label: 'Lead' },
+  { key: 'scheduled_at', label: 'Date & Time', sortable: true },
+  { key: 'status', label: 'Status' },
+  { key: 'assigned_to', label: 'Agent' },
+  { key: 'insurance_type', label: 'Type' },
+  { key: 'actions', label: '', align: 'right', width: '100px' },
+]
+
+const statusOptions = [{ value: '', label: 'All Statuses' }, ...APPOINTMENT_STATUS_OPTIONS]
+
+const from = computed(() =>
+  store.meta.total === 0 ? 0 : (store.meta.current_page - 1) * store.meta.per_page + 1,
+)
+const to = computed(() =>
+  Math.min(store.meta.current_page * store.meta.per_page, store.meta.total),
+)
+
+onMounted(() => {
+  store.fetchList()
+  store.fetchStats()
+})
+
+async function handleDelete(row) {
+  const ok = await ui.confirm('Delete Appointment', `Delete this appointment? This cannot be undone.`)
+  if (!ok) return
+  try {
+    await store.remove(row.id)
+    toast.showSuccess('Appointment deleted')
+  } catch (e) {
+    toast.showError(e?.message ?? 'Failed to delete appointment')
+  }
+}
+
+async function handleStatusChange(row, status) {
+  try {
+    await store.updateStatus(row.id, status)
+    toast.showSuccess('Status updated')
+  } catch (e) {
+    toast.showError(e?.message ?? 'Failed to update status')
+  }
+}
+</script>
+
+<template>
+  <div class="space-y-5">
+    <!-- Hero header -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-primary-hover px-6 py-5 shadow-card">
+      <div class="pointer-events-none absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/5" />
+      <div class="pointer-events-none absolute -bottom-10 -right-20 w-56 h-56 rounded-full bg-white/5" />
+      <div class="relative z-10 flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h1 class="text-2xl font-bold text-white">Appointments</h1>
+          <p class="text-sm text-indigo-200 mt-0.5">{{ store.meta.total }} appointments in total</p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <AppButton variant="secondary" size="sm" @click="showFilters = !showFilters">
+            <template #icon><Filter class="w-4 h-4" /></template>
+            Filters
+            <span
+              v-if="store.activeFiltersCount"
+              class="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary text-white text-[10px] font-bold"
+            >{{ store.activeFiltersCount }}</span>
+          </AppButton>
+          <AppButton size="sm" class="!bg-white !text-primary hover:!bg-indigo-50" @click="router.push({ name: 'appointments.create' })">
+            <template #icon><Plus class="w-4 h-4" /></template>
+            New Appointment
+          </AppButton>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats cards -->
+    <div v-if="store.stats" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <AppCard padding="sm" class="text-center">
+        <p class="text-2xl font-bold text-gray-900">{{ store.stats.total ?? 0 }}</p>
+        <p class="text-xs text-gray-500 mt-0.5">Total</p>
+      </AppCard>
+      <AppCard padding="sm" class="text-center">
+        <p class="text-2xl font-bold text-info">{{ store.stats.scheduled ?? 0 }}</p>
+        <p class="text-xs text-gray-500 mt-0.5">Scheduled</p>
+      </AppCard>
+      <AppCard padding="sm" class="text-center">
+        <p class="text-2xl font-bold text-success">{{ store.stats.completed ?? 0 }}</p>
+        <p class="text-xs text-gray-500 mt-0.5">Completed</p>
+      </AppCard>
+      <AppCard padding="sm" class="text-center">
+        <p class="text-2xl font-bold text-danger">{{ store.stats.cancelled ?? 0 }}</p>
+        <p class="text-xs text-gray-500 mt-0.5">Cancelled</p>
+      </AppCard>
+    </div>
+
+    <!-- Search + Filters -->
+    <AppCard padding="sm" class="space-y-3">
+      <AppSearchInput
+        :model-value="store.filters.search"
+        placeholder="Search lead name…"
+        @update:model-value="store.setFilter('search', $event)"
+      />
+      <Transition
+        enter-active-class="transition-all duration-200 ease-out"
+        enter-from-class="opacity-0 -translate-y-2"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition-all duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-2"
+      >
+        <div v-if="showFilters" class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <AppSelect
+            :model-value="store.filters.status"
+            :options="statusOptions"
+            placeholder="All Statuses"
+            @update:model-value="store.setFilter('status', $event)"
+          />
+          <AppInput
+            :model-value="store.filters.from"
+            type="date"
+            placeholder="From date"
+            @update:model-value="store.setFilter('from', $event)"
+          />
+          <AppInput
+            :model-value="store.filters.to"
+            type="date"
+            placeholder="To date"
+            @update:model-value="store.setFilter('to', $event)"
+          />
+          <div class="flex items-end">
+            <AppButton
+              v-if="store.activeFiltersCount"
+              variant="ghost"
+              size="sm"
+              class="w-full"
+              @click="store.resetFilters()"
+            >
+              <template #icon><X class="w-3.5 h-3.5" /></template>
+              Clear
+            </AppButton>
+          </div>
+        </div>
+      </Transition>
+    </AppCard>
+
+    <!-- Table -->
+    <AppCard padding="none">
+      <AppTable
+        :columns="COLUMNS"
+        :rows="store.list"
+        :loading="store.loading.list"
+        :sort-key="store.filters.sort_by"
+        :sort-dir="store.filters.sort_dir"
+        row-key="id"
+        empty-title="No appointments found"
+        empty-description="Adjust filters or create a new appointment."
+        @sort="({ key, dir }) => { store.filters.sort_by = key; store.filters.sort_dir = dir; store.fetchList() }"
+        @row-click="(row) => router.push({ name: 'appointments.detail', params: { id: row.id } })"
+      >
+        <template #cell-lead="{ row }">
+          <div v-if="row.lead" class="flex items-center gap-2">
+            <AppAvatar :name="row.lead.name" size="sm" />
+            <span class="font-medium text-gray-900 text-sm">{{ row.lead.name }}</span>
+          </div>
+          <span v-else class="text-gray-400 text-sm">—</span>
+        </template>
+
+        <template #cell-scheduled_at="{ value }">
+          <div class="flex items-center gap-1.5">
+            <Calendar class="w-3.5 h-3.5 text-gray-400 shrink-0" />
+            <span class="text-sm text-gray-700 whitespace-nowrap">{{ formatDateTime(value) }}</span>
+          </div>
+        </template>
+
+        <template #cell-status="{ row }">
+          <div @click.stop>
+            <select
+              :value="row.status"
+              class="text-xs rounded-lg border border-gray-200 bg-transparent px-2 py-1 focus:outline-none focus:border-primary"
+              @change="handleStatusChange(row, $event.target.value)"
+            >
+              <option v-for="s in APPOINTMENT_STATUS_OPTIONS" :key="s.value" :value="s.value">
+                {{ s.label }}
+              </option>
+            </select>
+          </div>
+        </template>
+
+        <template #cell-assigned_to="{ row }">
+          <div v-if="row.assigned_to" class="flex items-center gap-1.5">
+            <AppAvatar :name="row.assigned_to.name" size="xs" />
+            <span class="text-sm text-gray-700">{{ row.assigned_to.name }}</span>
+          </div>
+          <span v-else class="text-gray-400 text-sm">—</span>
+        </template>
+
+        <template #cell-insurance_type="{ value }">
+          <span class="text-xs text-gray-600">{{ value?.replace(/_/g, ' ') ?? '—' }}</span>
+        </template>
+
+        <template #cell-actions="{ row }">
+          <div class="flex items-center justify-end gap-1" @click.stop>
+            <AppButton
+              variant="ghost"
+              size="sm"
+              @click="router.push({ name: 'appointments.edit', params: { id: row.id } })"
+            >
+              Edit
+            </AppButton>
+            <AppButton
+              variant="ghost"
+              size="sm"
+              class="!text-danger hover:!bg-danger-bg"
+              @click="handleDelete(row)"
+            >
+              Delete
+            </AppButton>
+          </div>
+        </template>
+      </AppTable>
+
+      <div class="border-t border-gray-100 px-4">
+        <AppPagination
+          :current-page="store.meta.current_page"
+          :last-page="store.meta.last_page"
+          :total="store.meta.total"
+          :from="from"
+          :to="to"
+          :per-page="store.meta.per_page"
+          @page-change="store.setFilter('page', $event)"
+          @per-page-change="store.setFilter('per_page', $event)"
+        />
+      </div>
+    </AppCard>
+  </div>
+</template>

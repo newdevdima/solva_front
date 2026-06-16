@@ -1,0 +1,163 @@
+@import "tailwindcss";
+
+/* ─── Design Token Theme ──────────────────────────────────────── */
+@theme {
+  /* Typeface */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Brand / Primary (indigo-500 / indigo-600) */
+  --color-primary: #6366f1;
+  --color-primary-hover: #4f46e5;
+  --color-primary-light: #eef2ff;
+
+  /* Sidebar */
+  --color-sidebar: #1e1b4b;
+  --color-sidebar-icon: #a5b4fc;
+
+  /* Surfaces */
+  --color-page: #f3f4f6;
+
+  /* Status semantic */
+  --color-success: #10b981;
+  --color-success-bg: #d1fae5;
+  --color-danger: #ef4444;
+  --color-danger-bg: #fee2e2;
+  --color-warning: #f59e0b;
+  --color-warning-bg: #fef3c7;
+  --color-info: #3b82f6;
+  --color-info-bg: #dbeafe;
+  --color-neutral: #6b7280;
+  --color-neutral-bg: #f3f4f6;
+}
+
+/* ─── Base Reset ──────────────────────────────────────────────── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color-scheme: light;
+  }
+
+  body {
+    margin: 0;
+    background-color: #f3f4f6;
+    color: #111827;
+  }
+
+  /* Remove default button styles */
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  /* Smooth scrollbar in WebKit */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+}
+
+/* ─── Utility Overrides ───────────────────────────────────────── */
+@layer utilities {
+  /* Focus ring — only visible on keyboard focus, not mouse clicks */
+  .focus-ring {
+    outline: none;
+  }
+  .focus-ring:focus-visible {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  }
+
+  /* Card elevation */
+  .shadow-card {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .shadow-dropdown {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.10);
+  }
+
+  .shadow-modal {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Gradient hero */
+  .gradient-hero {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #3b82f6 100%);
+  }
+
+  /* Text truncation */
+  .truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Skeleton shimmer animation */
+  .skeleton-shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Toast slide-in */
+  .toast-enter-active {
+    transition: all 0.3s ease-out;
+  }
+  .toast-leave-active {
+    transition: all 0.25s ease-in;
+  }
+  .toast-enter-from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  .toast-leave-to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  /* Modal fade */
+  .modal-enter-active,
+  .modal-leave-active {
+    transition: opacity 0.2s ease;
+  }
+  .modal-enter-from,
+  .modal-leave-to {
+    opacity: 0;
+  }
+
+  .modal-panel-enter-active {
+    transition: all 0.25s ease-out;
+  }
+  .modal-panel-leave-active {
+    transition: all 0.2s ease-in;
+  }
+  .modal-panel-enter-from {
+    transform: scale(0.95) translateY(-8px);
+    opacity: 0;
+  }
+  .modal-panel-leave-to {
+    transform: scale(0.95) translateY(-8px);
+    opacity: 0;
+  }
+}

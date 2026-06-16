@@ -1,0 +1,223 @@
+<script setup>
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
+import {
+  LayoutDashboard,
+  Users,
+  CalendarDays,
+  Upload,
+  UsersRound,
+  UserCog,
+  Tag,
+  BarChart2,
+  TrendingUp,
+  Settings,
+  LogOut,
+  ChevronDown,
+  FileText,
+  UserCheck,
+} from 'lucide-vue-next'
+import { useAuthStore } from '@/stores/auth.store'
+import { useUiStore } from '@/stores/ui.store'
+import AppAvatar from '@/components/base/AppAvatar.vue'
+
+const auth = useAuthStore()
+const ui = useUiStore()
+const route = useRoute()
+
+const reportsOpen = ref(false)
+
+const reportSubItems = [
+  { label: 'Leads', to: '/reports/leads', icon: Users },
+  { label: 'Appointments', to: '/reports/appointments', icon: CalendarDays },
+  { label: 'Teams', to: '/reports/teams', icon: UsersRound },
+  { label: 'Agents', to: '/reports/agents', icon: UserCheck },
+  { label: 'Conversion', to: '/reports/conversion', icon: TrendingUp },
+]
+
+const navGroups = computed(() => [
+  {
+    items: [
+      { icon: LayoutDashboard, label: 'Dashboard', to: '/dashboard', permission: null },
+    ],
+  },
+  {
+    label: 'CRM',
+    items: [
+      { icon: Users, label: 'Leads', to: '/leads', permission: 'LEADS_VIEW_*' },
+      { icon: CalendarDays, label: 'Appointments', to: '/appointments', permission: 'APPOINTMENTS_VIEW_*' },
+      { icon: Upload, label: 'Import Leads', to: '/lead-imports', permission: 'LEADS_IMPORT' },
+    ],
+  },
+  {
+    label: 'Organization',
+    items: [
+      { icon: UsersRound, label: 'Teams', to: '/teams', permission: 'TEAMS_VIEW' },
+      { icon: UserCog, label: 'Users', to: '/users', permission: 'USERS_VIEW' },
+      { icon: Tag, label: 'Lead Sources', to: '/lead-sources', role: 'super_admin' },
+    ],
+  },
+])
+
+const isReportsActive = computed(() => route.path.startsWith('/reports'))
+
+// Auto-open reports sub-menu when on a report page
+if (route.path.startsWith('/reports')) {
+  reportsOpen.value = true
+}
+
+function isVisible(item) {
+  if (item.role) return auth.hasRole(item.role)
+  if (!item.permission) return true
+  const perms = Array.isArray(item.permission) ? item.permission : [item.permission]
+  return perms.some((p) =>
+    p.endsWith('_*') ? auth.canAny(p.slice(0, -2)) : auth.can(p),
+  )
+}
+
+function isActive(to) {
+  return route.path === to || (to !== '/dashboard' && route.path.startsWith(to))
+}
+
+function closeMobile() {
+  ui.sidebarOpen = false
+}
+</script>
+
+<template>
+  <!-- Sidebar: fixed drawer on mobile, relative column on desktop -->
+  <aside
+    :class="[
+      'fixed inset-y-0 left-0 z-30 flex flex-col w-64 bg-sidebar transition-transform duration-300',
+      'lg:relative lg:translate-x-0 lg:shrink-0',
+      ui.sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+    ]"
+  >
+    <!-- Logo -->
+    <div class="flex items-center gap-3 h-16 px-5 shrink-0 border-b border-white/10">
+      <div class="w-9 h-9 bg-primary rounded-xl flex items-center justify-center shadow-lg shrink-0">
+        <svg viewBox="0 0 24 24" class="w-5 h-5 text-white fill-none stroke-current" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div>
+        <p class="text-white font-semibold text-sm leading-tight">BrandNova</p>
+        <p class="text-sidebar-icon text-xs">CRM Platform</p>
+      </div>
+    </div>
+
+    <!-- Nav groups -->
+    <nav class="flex-1 overflow-y-auto overflow-x-hidden py-4 space-y-0.5 px-3">
+      <template v-for="(group, gi) in navGroups" :key="gi">
+        <!-- Group label -->
+        <p v-if="group.label" class="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-widest text-sidebar-icon/60">
+          {{ group.label }}
+        </p>
+
+        <template v-for="item in group.items" :key="item.to">
+          <RouterLink
+            v-if="isVisible(item)"
+            :to="item.to"
+            :class="[
+              'flex items-center gap-3 w-full h-10 px-3 rounded-lg text-sm font-medium transition-colors duration-150',
+              isActive(item.to)
+                ? 'bg-white/15 text-white'
+                : 'text-sidebar-icon hover:bg-white/8 hover:text-white',
+            ]"
+            @click="closeMobile"
+          >
+            <!-- Active indicator -->
+            <span
+              v-if="isActive(item.to)"
+              class="absolute left-3 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-full"
+            />
+            <component :is="item.icon" class="w-4 h-4 shrink-0" />
+            <span>{{ item.label }}</span>
+          </RouterLink>
+        </template>
+      </template>
+
+      <!-- Reports section with sub-menu -->
+      <div class="pt-4">
+        <p class="px-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-sidebar-icon/60">
+          Reports
+        </p>
+        <button
+          :class="[
+            'flex items-center gap-3 w-full h-10 px-3 rounded-lg text-sm font-medium transition-colors duration-150',
+            isReportsActive
+              ? 'bg-white/15 text-white'
+              : 'text-sidebar-icon hover:bg-white/8 hover:text-white',
+          ]"
+          @click="reportsOpen = !reportsOpen"
+        >
+          <BarChart2 class="w-4 h-4 shrink-0" />
+          <span class="flex-1 text-left">Reports</span>
+          <ChevronDown
+            :class="['w-3.5 h-3.5 transition-transform duration-200', reportsOpen ? 'rotate-180' : '']"
+          />
+        </button>
+
+        <Transition
+          enter-active-class="transition-all duration-200 ease-out overflow-hidden"
+          enter-from-class="max-h-0 opacity-0"
+          enter-to-class="max-h-48 opacity-100"
+          leave-active-class="transition-all duration-150 ease-in overflow-hidden"
+          leave-from-class="max-h-48 opacity-100"
+          leave-to-class="max-h-0 opacity-0"
+        >
+          <div v-if="reportsOpen" class="mt-0.5 ml-4 space-y-0.5 border-l border-white/10 pl-3">
+            <RouterLink
+              v-for="sub in reportSubItems"
+              :key="sub.to"
+              :to="sub.to"
+              :class="[
+                'flex items-center gap-2.5 w-full h-9 px-2 rounded-lg text-xs font-medium transition-colors duration-150',
+                route.path === sub.to
+                  ? 'bg-white/15 text-white'
+                  : 'text-sidebar-icon hover:bg-white/8 hover:text-white',
+              ]"
+              @click="closeMobile"
+            >
+              <component :is="sub.icon" class="w-3.5 h-3.5 shrink-0" />
+              <span>{{ sub.label }}</span>
+            </RouterLink>
+          </div>
+        </Transition>
+      </div>
+    </nav>
+
+    <!-- Bottom: profile + logout -->
+    <div class="shrink-0 border-t border-white/10 p-3 space-y-0.5">
+      <RouterLink
+        to="/profile"
+        :class="[
+          'flex items-center gap-3 w-full h-10 px-3 rounded-lg text-sm font-medium transition-colors duration-150',
+          route.path === '/profile'
+            ? 'bg-white/15 text-white'
+            : 'text-sidebar-icon hover:bg-white/8 hover:text-white',
+        ]"
+        @click="closeMobile"
+      >
+        <Settings class="w-4 h-4 shrink-0" />
+        <span>Settings</span>
+      </RouterLink>
+
+      <!-- User info + logout -->
+      <div class="flex items-center gap-3 px-3 pt-2 mt-1 border-t border-white/10">
+        <AppAvatar :name="auth.user?.name" size="sm" class="shrink-0" />
+        <div class="flex-1 min-w-0">
+          <p class="text-white text-xs font-medium truncate">{{ auth.user?.name ?? 'User' }}</p>
+          <p class="text-sidebar-icon text-[10px] truncate capitalize">{{ auth.user?.role?.replace('_', ' ') ?? '' }}</p>
+        </div>
+        <button
+          class="text-sidebar-icon hover:text-white transition-colors p-1 rounded"
+          title="Logout"
+          @click="auth.logout()"
+        >
+          <LogOut class="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  </aside>
+</template>
