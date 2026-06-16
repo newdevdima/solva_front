@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import {
   LayoutDashboard,
   Users,
@@ -24,44 +25,49 @@ import AppAvatar from '@/components/base/AppAvatar.vue'
 const auth = useAuthStore()
 const ui = useUiStore()
 const route = useRoute()
+const router = useRouter()
+const { t } = useI18n()
+
+const canViewReports = computed(() =>
+  auth.can('REPORTS_VIEW_ALL') || auth.can('REPORTS_VIEW_TEAM'),
+)
 
 const reportsOpen = ref(false)
 
-const reportSubItems = [
-  { label: 'Leads', to: '/reports/leads', icon: Users },
-  { label: 'Appointments', to: '/reports/appointments', icon: CalendarDays },
-  { label: 'Teams', to: '/reports/teams', icon: UsersRound },
-  { label: 'Agents', to: '/reports/agents', icon: UserCheck },
-  { label: 'Conversion', to: '/reports/conversion', icon: TrendingUp },
-]
+const reportSubItems = computed(() => [
+  { label: t('leads.title'), to: '/reports/leads', icon: Users },
+  { label: t('appointments.title'), to: '/reports/appointments', icon: CalendarDays },
+  { label: t('teams.title'), to: '/reports/teams', icon: UsersRound },
+  { label: t('reports.agents'), to: '/reports/agents', icon: UserCheck },
+  { label: t('reports.conversion'), to: '/reports/conversion', icon: TrendingUp },
+])
 
 const navGroups = computed(() => [
   {
     items: [
-      { icon: LayoutDashboard, label: 'Dashboard', to: '/dashboard', permission: null },
+      { icon: LayoutDashboard, label: t('nav.dashboard'), to: '/dashboard', permission: null },
     ],
   },
   {
-    label: 'CRM',
+    label: t('nav.crm'),
     items: [
-      { icon: Users, label: 'Leads', to: '/leads', permission: 'LEADS_VIEW_*' },
-      { icon: CalendarDays, label: 'Appointments', to: '/appointments', permission: 'APPOINTMENTS_VIEW_*' },
-      { icon: Upload, label: 'Import Leads', to: '/lead-imports', permission: 'LEADS_IMPORT' },
+      { icon: Users, label: t('nav.leads'), to: '/leads', permission: 'LEADS_VIEW_*' },
+      { icon: CalendarDays, label: t('nav.appointments'), to: '/appointments', permission: 'APPOINTMENTS_VIEW_*' },
+      { icon: Upload, label: t('nav.importLeads'), to: '/lead-imports', permission: 'LEADS_IMPORT' },
     ],
   },
   {
-    label: 'Organization',
+    label: t('nav.organization'),
     items: [
-      { icon: UsersRound, label: 'Teams', to: '/teams', permission: 'TEAMS_VIEW' },
-      { icon: UserCog, label: 'Users', to: '/users', permission: 'USERS_VIEW' },
-      { icon: Tag, label: 'Lead Sources', to: '/lead-sources', role: 'super_admin' },
+      { icon: UsersRound, label: t('nav.teams'), to: '/teams', permission: 'TEAMS_VIEW' },
+      { icon: UserCog, label: t('nav.users'), to: '/users', permission: 'USERS_VIEW' },
+      { icon: Tag, label: t('nav.leadSources'), to: '/lead-sources', role: 'super_admin' },
     ],
   },
 ])
 
 const isReportsActive = computed(() => route.path.startsWith('/reports'))
 
-// Auto-open reports sub-menu when on a report page
 if (route.path.startsWith('/reports')) {
   reportsOpen.value = true
 }
@@ -81,6 +87,11 @@ function isActive(to) {
 
 function closeMobile() {
   ui.sidebarOpen = false
+}
+
+async function handleLogout() {
+  await auth.logout()
+  router.push({ name: 'login' })
 }
 </script>
 
@@ -126,7 +137,6 @@ function closeMobile() {
             ]"
             @click="closeMobile"
           >
-            <!-- Active indicator -->
             <span
               v-if="isActive(item.to)"
               class="absolute left-3 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-full"
@@ -138,9 +148,9 @@ function closeMobile() {
       </template>
 
       <!-- Reports section with sub-menu -->
-      <div class="pt-4">
+      <div v-if="canViewReports" class="pt-4">
         <p class="px-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-sidebar-icon/60">
-          Reports
+          {{ t('nav.reports') }}
         </p>
         <button
           :class="[
@@ -152,7 +162,7 @@ function closeMobile() {
           @click="reportsOpen = !reportsOpen"
         >
           <BarChart2 class="w-4 h-4 shrink-0" />
-          <span class="flex-1 text-left">Reports</span>
+          <span class="flex-1 text-left">{{ t('nav.reports') }}</span>
           <ChevronDown
             :class="['w-3.5 h-3.5 transition-transform duration-200', reportsOpen ? 'rotate-180' : '']"
           />
@@ -200,7 +210,7 @@ function closeMobile() {
         @click="closeMobile"
       >
         <Settings class="w-4 h-4 shrink-0" />
-        <span>Settings</span>
+        <span>{{ t('nav.settings') }}</span>
       </RouterLink>
 
       <!-- User info + logout -->
@@ -208,12 +218,12 @@ function closeMobile() {
         <AppAvatar :name="auth.user?.name" size="sm" class="shrink-0" />
         <div class="flex-1 min-w-0">
           <p class="text-white text-xs font-medium truncate">{{ auth.user?.name ?? 'User' }}</p>
-          <p class="text-sidebar-icon text-[10px] truncate capitalize">{{ auth.user?.role?.replace('_', ' ') ?? '' }}</p>
+          <p class="text-sidebar-icon text-[10px] truncate capitalize">{{ (auth.user?.roles?.[0] ?? auth.user?.role ?? '').replace(/_/g, ' ') }}</p>
         </div>
         <button
           class="text-sidebar-icon hover:text-white transition-colors p-1 rounded"
-          title="Logout"
-          @click="auth.logout()"
+          :title="t('nav.logout')"
+          @click="handleLogout"
         >
           <LogOut class="w-4 h-4" />
         </button>

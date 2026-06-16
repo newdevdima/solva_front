@@ -25,18 +25,21 @@ export const useTeamsStore = defineStore('teams', () => {
   })
 
   const errors = ref(null)
+  let _listGen = 0
 
   async function fetchList() {
+    const gen = ++_listGen
     loading.list = true
     errors.value = null
     try {
       const { data, meta: m } = await teamsApi.list(_buildParams())
+      if (gen !== _listGen) return
       list.value = data
       if (m) meta.value = m
     } catch (e) {
-      errors.value = e
+      if (gen === _listGen) errors.value = e
     } finally {
-      loading.list = false
+      if (gen === _listGen) loading.list = false
     }
   }
 

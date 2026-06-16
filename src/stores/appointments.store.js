@@ -33,6 +33,7 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   })
 
   const errors = ref(null)
+  let _listGen = 0
 
   const activeFiltersCount = computed(() => {
     const { search, status, lead_id, assigned_to, from, to } = filters
@@ -40,16 +41,18 @@ export const useAppointmentsStore = defineStore('appointments', () => {
   })
 
   async function fetchList() {
+    const gen = ++_listGen
     loading.list = true
     errors.value = null
     try {
       const { data, meta: m } = await appointmentsApi.list(_buildParams())
+      if (gen !== _listGen) return
       list.value = data
       if (m) meta.value = m
     } catch (e) {
-      errors.value = e
+      if (gen === _listGen) errors.value = e
     } finally {
-      loading.list = false
+      if (gen === _listGen) loading.list = false
     }
   }
 

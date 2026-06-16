@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
+import { i18n } from './i18n'
 import { vCan } from './directives/vCan'
 import { useAuthStore } from './stores/auth.store'
 import { useUiStore } from './stores/ui.store'
@@ -14,6 +15,7 @@ const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
+app.use(i18n)
 
 // Global directives
 app.directive('can', vCan)

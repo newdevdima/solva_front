@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   Users, UserPlus, TrendingUp, CalendarCheck, BarChart2,
   UserCheck, Building2, AlertCircle,
@@ -25,6 +26,7 @@ import DonutChart from '@/components/charts/DonutChart.vue'
 /* ── Stores ────────────────────────────────────────────────── */
 const auth = useAuthStore()
 const dash = useDashboardStore()
+const { t } = useI18n()
 
 /* ── Permissions ───────────────────────────────────────────── */
 const canViewGlobal = computed(() => auth.can('DASHBOARD_VIEW_GLOBAL'))
@@ -52,7 +54,7 @@ const teams = computed(() => dash.kpis?.teams ?? null)
 const appointmentSubValue = computed(() => {
   const a = appointments.value
   if (!a) return null
-  return `${a.completed ?? 0} completed · ${a.scheduled ?? 0} scheduled`
+  return `${a.completed ?? 0} ${t('dashboard.completed')} · ${a.scheduled ?? 0} ${t('dashboard.scheduled')}`
 })
 
 /* ── Donut: Leads by Status ────────────────────────────────── */
@@ -115,20 +117,20 @@ const insuranceRows = computed(() => {
 const teamRows = computed(() => dash.aggregations?.by_team ?? [])
 const agentRows = computed(() => dash.aggregations?.by_agent ?? [])
 
-const teamColumns = [
-  { key: 'team_name', label: 'Team' },
-  { key: 'leads_total', label: 'Leads', align: 'right' },
-  { key: 'leads_validated', label: 'Validated', align: 'right' },
-  { key: 'appointments_completed', label: 'Appts Done', align: 'right' },
+const teamColumns = computed(() => [
+  { key: 'team_name', label: t('teams.name') },
+  { key: 'leads_total', label: t('leads.title'), align: 'right' },
+  { key: 'leads_validated', label: 'Validés', align: 'right' },
+  { key: 'appointments_completed', label: t('appointments.title'), align: 'right' },
   { key: '_conversion', label: 'Conv.', align: 'right' },
-]
+])
 
-const agentColumns = [
+const agentColumns = computed(() => [
   { key: 'agent_name', label: 'Agent' },
-  { key: 'leads_total', label: 'Leads', align: 'right' },
-  { key: 'leads_validated', label: 'Validated', align: 'right' },
-  { key: 'appointments_completed', label: 'Appts Done', align: 'right' },
-]
+  { key: 'leads_total', label: t('leads.title'), align: 'right' },
+  { key: 'leads_validated', label: 'Validés', align: 'right' },
+  { key: 'appointments_completed', label: t('appointments.title'), align: 'right' },
+])
 
 /* Enrich team rows with computed conversion rate */
 const enrichedTeamRows = computed(() =>
@@ -156,9 +158,9 @@ onMounted(() => {
       <div class="pointer-events-none absolute -bottom-10 -right-20 w-56 h-56 rounded-full bg-white/5" />
       <div class="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-white">Dashboard</h1>
+          <h1 class="text-2xl font-bold text-white">{{ t('dashboard.title') }}</h1>
           <p class="text-sm text-indigo-200 mt-0.5">
-            Welcome back, <span class="font-semibold text-white">{{ auth.user?.name }}</span>
+            {{ t('dashboard.welcome') }} <span class="font-semibold text-white">{{ auth.user?.name }}</span>
           </p>
         </div>
         <DashboardDateFilter v-model="filterModel" />
@@ -168,30 +170,30 @@ onMounted(() => {
     <!-- ── Row 1: KPI cards ─────────────────────────────────── -->
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
       <KpiCard
-        title="Total Leads"
+        :title="t('dashboard.totalLeads')"
         :value="leads?.total"
         :loading="dash.loading.kpis"
         :icon="Users"
         accent="indigo"
       />
       <KpiCard
-        title="New Today"
+        :title="t('dashboard.newToday')"
         :value="leads?.new_today"
         :loading="dash.loading.kpis"
         :icon="UserPlus"
         accent="emerald"
       />
       <KpiCard
-        title="Conversion Rate"
+        :title="t('dashboard.conversionRate')"
         :value="leads?.conversion_rate"
         format="rate"
-        :sub-value="leads ? `${leads.validated ?? 0} validated leads` : null"
+        :sub-value="leads ? `${leads.validated ?? 0} ${t('dashboard.validatedLeads')}` : null"
         :loading="dash.loading.kpis"
         :icon="TrendingUp"
         accent="blue"
       />
       <KpiCard
-        title="Appointments"
+        :title="t('dashboard.appointments')"
         :value="appointments?.total"
         :sub-value="appointmentSubValue"
         :loading="dash.loading.kpis"
@@ -207,18 +209,18 @@ onMounted(() => {
     >
       <KpiCard
         v-if="agents"
-        title="Active Agents"
+        :title="t('dashboard.activeAgents')"
         :value="agents?.active"
-        :sub-value="agents ? `${agents.total} total agents` : null"
+        :sub-value="agents ? `${agents.total} total` : null"
         :loading="dash.loading.kpis"
         :icon="UserCheck"
         accent="indigo"
       />
       <KpiCard
         v-if="teams"
-        title="Active Teams"
+        :title="t('dashboard.activeTeams')"
         :value="teams?.active"
-        :sub-value="teams ? `${teams.total} total teams` : null"
+        :sub-value="teams ? `${teams.total} total` : null"
         :loading="dash.loading.kpis"
         :icon="Building2"
         accent="emerald"
@@ -232,8 +234,8 @@ onMounted(() => {
       <AppCard padding="none">
         <div class="px-5 pt-5 pb-3 flex items-center justify-between">
           <div>
-            <h3 class="font-semibold text-gray-900">Leads Over Time</h3>
-            <p class="text-xs text-gray-400 mt-0.5">Daily new leads</p>
+            <h3 class="font-semibold text-gray-900">{{ t('dashboard.leadsOverTime') }}</h3>
+            <p class="text-xs text-gray-400 mt-0.5">{{ t('dashboard.dailyNewLeads') }}</p>
           </div>
           <div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
             <TrendingUp class="w-3.5 h-3.5 text-primary" />
@@ -257,7 +259,7 @@ onMounted(() => {
           <template v-else>
             <div class="h-[220px] flex flex-col items-center justify-center gap-2 text-gray-400">
               <BarChart2 class="w-8 h-8 opacity-40" />
-              <p class="text-sm">No data for this period</p>
+              <p class="text-sm">{{ t('dashboard.noDataPeriod') }}</p>
             </div>
           </template>
         </div>
@@ -267,8 +269,8 @@ onMounted(() => {
       <AppCard padding="none">
         <div class="px-5 pt-5 pb-3 flex items-center justify-between">
           <div>
-            <h3 class="font-semibold text-gray-900">Appointments Over Time</h3>
-            <p class="text-xs text-gray-400 mt-0.5">Daily appointment volume</p>
+            <h3 class="font-semibold text-gray-900">{{ t('dashboard.appointmentsOverTime') }}</h3>
+            <p class="text-xs text-gray-400 mt-0.5">{{ t('dashboard.dailyVolume') }}</p>
           </div>
           <div class="w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center">
             <CalendarCheck class="w-3.5 h-3.5 text-amber-500" />
@@ -292,7 +294,7 @@ onMounted(() => {
           <template v-else>
             <div class="h-[220px] flex flex-col items-center justify-center gap-2 text-gray-400">
               <BarChart2 class="w-8 h-8 opacity-40" />
-              <p class="text-sm">No data for this period</p>
+              <p class="text-sm">{{ t('dashboard.noDataPeriod') }}</p>
             </div>
           </template>
         </div>
@@ -306,8 +308,8 @@ onMounted(() => {
       <AppCard>
         <div class="flex items-center justify-between mb-5">
           <div>
-            <h3 class="font-semibold text-gray-900">Leads by Status</h3>
-            <p class="text-xs text-gray-400 mt-0.5">Current distribution</p>
+            <h3 class="font-semibold text-gray-900">{{ t('dashboard.leadsByStatus') }}</h3>
+            <p class="text-xs text-gray-400 mt-0.5">{{ t('dashboard.currentDistribution') }}</p>
           </div>
           <AppBadge v-if="leads?.total" :label="String(leads.total)" variant="neutral" />
         </div>
@@ -335,8 +337,8 @@ onMounted(() => {
       <AppCard>
         <div class="flex items-center justify-between mb-5">
           <div>
-            <h3 class="font-semibold text-gray-900">Leads by Insurance Type</h3>
-            <p class="text-xs text-gray-400 mt-0.5">Volume per product</p>
+            <h3 class="font-semibold text-gray-900">{{ t('dashboard.leadsByInsuranceType') }}</h3>
+            <p class="text-xs text-gray-400 mt-0.5">{{ t('dashboard.volumePerProduct') }}</p>
           </div>
         </div>
 
@@ -383,8 +385,8 @@ onMounted(() => {
     <AppCard v-if="aptByStatusSegments.length || dash.loading.statistics">
       <div class="flex items-center justify-between mb-5">
         <div>
-          <h3 class="font-semibold text-gray-900">Appointments by Status</h3>
-          <p class="text-xs text-gray-400 mt-0.5">Completion overview</p>
+          <h3 class="font-semibold text-gray-900">{{ t('dashboard.appointmentsByStatus') }}</h3>
+          <p class="text-xs text-gray-400 mt-0.5">{{ t('dashboard.completionOverview') }}</p>
         </div>
         <AppBadge
           v-if="appointments?.total"
@@ -413,7 +415,7 @@ onMounted(() => {
       <AppCard v-if="teamRows.length || dash.loading.aggregations" padding="none">
         <div class="px-5 pt-5 pb-4 flex items-center justify-between border-b border-gray-100">
           <div>
-            <h3 class="font-semibold text-gray-900">Performance by Team</h3>
+            <h3 class="font-semibold text-gray-900">{{ t('dashboard.performanceByTeam') }}</h3>
             <p class="text-xs text-gray-400 mt-0.5">Leads, validation, and appointment completion</p>
           </div>
           <AppBadge
@@ -493,7 +495,7 @@ onMounted(() => {
       <AppCard v-if="canViewGlobal && (agentRows.length || dash.loading.aggregations)" padding="none">
         <div class="px-5 pt-5 pb-4 flex items-center justify-between border-b border-gray-100">
           <div>
-            <h3 class="font-semibold text-gray-900">Performance by Agent</h3>
+            <h3 class="font-semibold text-gray-900">{{ t('dashboard.performanceByAgent') }}</h3>
             <p class="text-xs text-gray-400 mt-0.5">Individual agent breakdown</p>
           </div>
           <AppBadge

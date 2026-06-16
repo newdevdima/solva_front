@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { Plus, Filter, X } from 'lucide-vue-next'
 import { useUsersStore } from '@/stores/users.store'
 import { useUiStore } from '@/stores/ui.store'
@@ -21,24 +22,25 @@ const router = useRouter()
 const store = useUsersStore()
 const ui = useUiStore()
 const toast = useToast()
+const { t } = useI18n()
 
 const showFilters = ref(false)
 
-const COLUMNS = [
-  { key: 'name', label: 'Name', sortable: false },
-  { key: 'email', label: 'Email' },
-  { key: 'role', label: 'Role' },
-  { key: 'is_active', label: 'Status' },
-  { key: 'created_at', label: 'Joined' },
+const COLUMNS = computed(() => [
+  { key: 'name', label: t('users.name'), sortable: false },
+  { key: 'email', label: t('users.email') },
+  { key: 'roles', label: t('users.role') },
+  { key: 'is_active', label: t('users.status') },
+  { key: 'created_at', label: t('users.joined') },
   { key: 'actions', label: '', align: 'right', width: '120px' },
-]
+])
 
-const roleOptions = [{ value: '', label: 'All Roles' }, ...ROLE_OPTIONS]
-const statusOptions = [
-  { value: '', label: 'All Statuses' },
-  { value: '1', label: 'Active' },
-  { value: '0', label: 'Inactive' },
-]
+const roleOptions = computed(() => [{ value: '', label: t('users.allRoles') }, ...ROLE_OPTIONS])
+const statusOptions = computed(() => [
+  { value: '', label: t('users.allStatuses') },
+  { value: '1', label: t('common.active') },
+  { value: '0', label: t('common.inactive') },
+])
 
 const from = computed(() =>
   store.meta.total === 0 ? 0 : (store.meta.current_page - 1) * store.meta.per_page + 1,
@@ -50,18 +52,18 @@ onMounted(() => store.fetchList())
 async function toggleActive(user) {
   try {
     await store.toggleStatus(user.id, !user.is_active)
-    toast.showSuccess(user.is_active ? 'User deactivated' : 'User activated')
+    toast.showSuccess(user.is_active ? t('users.deactivateSuccess') : t('users.activateSuccess'))
   } catch (e) {
     toast.showError(e?.message ?? 'Failed to update status')
   }
 }
 
 async function handleDelete(user) {
-  const ok = await ui.confirm('Delete User', `Delete "${user.name}"? This cannot be undone.`)
+  const ok = await ui.confirm(t('users.deleteTitle'), `Delete "${user.name}"? This cannot be undone.`)
   if (!ok) return
   try {
     await store.remove(user.id)
-    toast.showSuccess('User deleted')
+    toast.showSuccess(t('users.deleteSuccess'))
   } catch (e) {
     toast.showError(e?.message ?? 'Failed to delete user')
   }
@@ -76,17 +78,17 @@ async function handleDelete(user) {
       <div class="pointer-events-none absolute -bottom-10 -right-20 w-56 h-56 rounded-full bg-white/5" />
       <div class="relative z-10 flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 class="text-2xl font-bold text-white">Users</h1>
-          <p class="text-sm text-indigo-200 mt-0.5">{{ store.meta.total }} users in the system</p>
+          <h1 class="text-2xl font-bold text-white">{{ t('users.title') }}</h1>
+          <p class="text-sm text-indigo-200 mt-0.5">{{ store.meta.total }} {{ t('users.total') }}</p>
         </div>
         <div class="flex items-center gap-2 shrink-0">
           <AppButton variant="secondary" size="sm" @click="showFilters = !showFilters">
             <template #icon><Filter class="w-4 h-4" /></template>
-            Filters
+            {{ t('common.filter') }}
           </AppButton>
           <AppButton size="sm" class="!bg-white !text-primary hover:!bg-indigo-50" @click="router.push({ name: 'users.create' })">
             <template #icon><Plus class="w-4 h-4" /></template>
-            New User
+            {{ t('users.newUser') }}
           </AppButton>
         </div>
       </div>
@@ -141,8 +143,8 @@ async function handleDelete(user) {
         :rows="store.list"
         :loading="store.loading.list"
         row-key="id"
-        empty-title="No users found"
-        empty-description="Invite the first team member."
+        :empty-title="t('users.noUsers')"
+        :empty-description="t('users.inviteFirst')"
         @row-click="(row) => router.push({ name: 'users.detail', params: { id: row.id } })"
       >
         <template #cell-name="{ row }">
@@ -156,10 +158,10 @@ async function handleDelete(user) {
           <span class="text-sm text-gray-500">{{ value }}</span>
         </template>
 
-        <template #cell-role="{ value }">
+        <template #cell-roles="{ value }">
           <AppBadge
-            :variant="value === 'super_admin' ? 'danger' : value === 'manager' ? 'warning' : 'info'"
-            :label="value?.replace('_', ' ') ?? '—'"
+            :variant="value?.[0] === 'super_admin' ? 'danger' : value?.[0] === 'manager' ? 'warning' : 'info'"
+            :label="value?.[0]?.replace(/_/g, ' ') ?? '—'"
           />
         </template>
 
@@ -183,7 +185,7 @@ async function handleDelete(user) {
               size="sm"
               @click="router.push({ name: 'users.edit', params: { id: row.id } })"
             >
-              Edit
+              {{ t('common.edit') }}
             </AppButton>
             <AppButton
               variant="ghost"
@@ -191,7 +193,7 @@ async function handleDelete(user) {
               class="!text-danger hover:!bg-danger-bg"
               @click="handleDelete(row)"
             >
-              Delete
+              {{ t('common.delete') }}
             </AppButton>
           </div>
         </template>

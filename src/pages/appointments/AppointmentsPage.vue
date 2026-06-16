@@ -1,9 +1,11 @@
 <script setup>
 import { onMounted, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { Plus, Filter, X, Calendar } from 'lucide-vue-next'
 import { useAppointmentsStore } from '@/stores/appointments.store'
 import { useUiStore } from '@/stores/ui.store'
+import { useAuthStore } from '@/stores/auth.store'
 import { useToast } from '@/composables/useToast'
 import AppCard from '@/components/base/AppCard.vue'
 import AppButton from '@/components/base/AppButton.vue'
@@ -21,20 +23,22 @@ import { formatDateTime, formatDate } from '@/utils/formatters'
 const router = useRouter()
 const store = useAppointmentsStore()
 const ui = useUiStore()
+const auth = useAuthStore()
 const toast = useToast()
+const { t } = useI18n()
 
 const showFilters = ref(false)
 
-const COLUMNS = [
-  { key: 'lead', label: 'Lead' },
-  { key: 'scheduled_at', label: 'Date & Time', sortable: true },
-  { key: 'status', label: 'Status' },
-  { key: 'assigned_to', label: 'Agent' },
-  { key: 'insurance_type', label: 'Type' },
+const COLUMNS = computed(() => [
+  { key: 'lead', label: t('appointments.lead') },
+  { key: 'scheduled_at', label: t('appointments.dateTime'), sortable: true },
+  { key: 'status', label: t('appointments.status') },
+  { key: 'assigned_to', label: t('appointments.agent') },
+  { key: 'insurance_type', label: t('appointments.insuranceType') },
   { key: 'actions', label: '', align: 'right', width: '100px' },
-]
+])
 
-const statusOptions = [{ value: '', label: 'All Statuses' }, ...APPOINTMENT_STATUS_OPTIONS]
+const statusOptions = computed(() => [{ value: '', label: t('appointments.allStatuses') }, ...APPOINTMENT_STATUS_OPTIONS])
 
 const from = computed(() =>
   store.meta.total === 0 ? 0 : (store.meta.current_page - 1) * store.meta.per_page + 1,
@@ -49,11 +53,11 @@ onMounted(() => {
 })
 
 async function handleDelete(row) {
-  const ok = await ui.confirm('Delete Appointment', `Delete this appointment? This cannot be undone.`)
+  const ok = await ui.confirm(t('appointments.deleteTitle'), t('appointments.deleteConfirm'))
   if (!ok) return
   try {
     await store.remove(row.id)
-    toast.showSuccess('Appointment deleted')
+    toast.showSuccess(t('appointments.deleteSuccess'))
   } catch (e) {
     toast.showError(e?.message ?? 'Failed to delete appointment')
   }
@@ -62,7 +66,7 @@ async function handleDelete(row) {
 async function handleStatusChange(row, status) {
   try {
     await store.updateStatus(row.id, status)
-    toast.showSuccess('Status updated')
+    toast.showSuccess(t('appointments.statusUpdated'))
   } catch (e) {
     toast.showError(e?.message ?? 'Failed to update status')
   }
@@ -77,21 +81,26 @@ async function handleStatusChange(row, status) {
       <div class="pointer-events-none absolute -bottom-10 -right-20 w-56 h-56 rounded-full bg-white/5" />
       <div class="relative z-10 flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 class="text-2xl font-bold text-white">Appointments</h1>
-          <p class="text-sm text-indigo-200 mt-0.5">{{ store.meta.total }} appointments in total</p>
+          <h1 class="text-2xl font-bold text-white">{{ t('appointments.title') }}</h1>
+          <p class="text-sm text-indigo-200 mt-0.5">{{ store.meta.total }} {{ t('appointments.total') }}</p>
         </div>
         <div class="flex items-center gap-2 shrink-0">
           <AppButton variant="secondary" size="sm" @click="showFilters = !showFilters">
             <template #icon><Filter class="w-4 h-4" /></template>
-            Filters
+            {{ t('common.filter') }}
             <span
               v-if="store.activeFiltersCount"
               class="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary text-white text-[10px] font-bold"
             >{{ store.activeFiltersCount }}</span>
           </AppButton>
-          <AppButton size="sm" class="!bg-white !text-primary hover:!bg-indigo-50" @click="router.push({ name: 'appointments.create' })">
+          <AppButton
+            v-if="auth.can('APPOINTMENTS_CREATE')"
+            size="sm"
+            class="!bg-white !text-primary hover:!bg-indigo-50"
+            @click="router.push({ name: 'appointments.create' })"
+          >
             <template #icon><Plus class="w-4 h-4" /></template>
-            New Appointment
+            {{ t('appointments.newAppointment') }}
           </AppButton>
         </div>
       </div>
@@ -225,6 +234,7 @@ async function handleStatusChange(row, status) {
         <template #cell-actions="{ row }">
           <div class="flex items-center justify-end gap-1" @click.stop>
             <AppButton
+              v-if="auth.can('APPOINTMENTS_UPDATE')"
               variant="ghost"
               size="sm"
               @click="router.push({ name: 'appointments.edit', params: { id: row.id } })"
@@ -232,6 +242,7 @@ async function handleStatusChange(row, status) {
               Edit
             </AppButton>
             <AppButton
+              v-if="auth.can('APPOINTMENTS_DELETE')"
               variant="ghost"
               size="sm"
               class="!text-danger hover:!bg-danger-bg"

@@ -1,10 +1,12 @@
 <script setup>
 import { onMounted, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { Plus, Filter, X, UserCircle } from 'lucide-vue-next'
 import { useLeadsStore } from '@/stores/leads.store'
 import { useLeadSourcesStore } from '@/stores/leadSources.store'
 import { useUiStore } from '@/stores/ui.store'
+import { useAuthStore } from '@/stores/auth.store'
 import { useToast } from '@/composables/useToast'
 import AppCard from '@/components/base/AppCard.vue'
 import AppButton from '@/components/base/AppButton.vue'
@@ -23,29 +25,31 @@ const router = useRouter()
 const leadsStore = useLeadsStore()
 const sourcesStore = useLeadSourcesStore()
 const ui = useUiStore()
+const auth = useAuthStore()
 const toast = useToast()
+const { t } = useI18n()
 
 const showFilters = ref(false)
 const statusChangingId = ref(null)
 
-const COLUMNS = [
-  { key: 'name', label: 'Name', sortable: true },
-  { key: 'phone', label: 'Phone' },
-  { key: 'insurance_type', label: 'Type' },
-  { key: 'status', label: 'Status' },
-  { key: 'source', label: 'Source' },
-  { key: 'assigned_to', label: 'Assigned' },
-  { key: 'created_at', label: 'Created', sortable: true },
+const COLUMNS = computed(() => [
+  { key: 'name', label: t('leads.name'), sortable: true },
+  { key: 'phone', label: t('leads.phone') },
+  { key: 'insurance_type', label: t('leads.insuranceType') },
+  { key: 'status', label: t('leads.status') },
+  { key: 'source', label: t('leads.source') },
+  { key: 'assigned_to', label: t('leads.assignedTo') },
+  { key: 'created_at', label: t('leads.createdAt'), sortable: true },
   { key: 'actions', label: '', align: 'right', width: '100px' },
-]
+])
 
 const sourceOptions = computed(() => [
-  { value: '', label: 'All Sources' },
+  { value: '', label: t('leads.allSources') },
   ...sourcesStore.list.map((s) => ({ value: s.id, label: s.name })),
 ])
 
-const statusOptions = [{ value: '', label: 'All Statuses' }, ...LEAD_STATUS_OPTIONS]
-const insuranceOptions = [{ value: '', label: 'All Types' }, ...INSURANCE_TYPE_OPTIONS]
+const statusOptions = computed(() => [{ value: '', label: t('leads.allStatuses') }, ...LEAD_STATUS_OPTIONS])
+const insuranceOptions = computed(() => [{ value: '', label: t('leads.allTypes') }, ...INSURANCE_TYPE_OPTIONS])
 
 onMounted(() => {
   leadsStore.fetchList()
@@ -62,7 +66,7 @@ async function onStatusChange(lead, status) {
   statusChangingId.value = lead.id
   try {
     await leadsStore.updateStatus(lead.id, status)
-    toast.showSuccess('Status updated')
+    toast.showSuccess(t('leads.statusUpdated'))
   } catch (e) {
     toast.showError(e?.message ?? 'Failed to update status')
   } finally {
@@ -71,11 +75,12 @@ async function onStatusChange(lead, status) {
 }
 
 async function handleDelete(row) {
-  const ok = await ui.confirm('Delete Lead', `Delete "${row.name}"? This cannot be undone.`)
+  const fullName = [row.first_name, row.last_name].filter(Boolean).join(' ')
+  const ok = await ui.confirm(t('leads.deleteTitle'), `Delete "${fullName}"? This cannot be undone.`)
   if (!ok) return
   try {
     await leadsStore.remove(row.id)
-    toast.showSuccess('Lead deleted')
+    toast.showSuccess(t('leads.deleteSuccess'))
   } catch (e) {
     toast.showError(e?.message ?? 'Failed to delete lead')
   }
@@ -100,21 +105,26 @@ const to = computed(() =>
       <div class="pointer-events-none absolute -bottom-10 -right-20 w-56 h-56 rounded-full bg-white/5" />
       <div class="relative z-10 flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 class="text-2xl font-bold text-white">Leads</h1>
-          <p class="text-sm text-indigo-200 mt-0.5">{{ leadsStore.meta.total }} leads in total</p>
+          <h1 class="text-2xl font-bold text-white">{{ t('leads.title') }}</h1>
+          <p class="text-sm text-indigo-200 mt-0.5">{{ leadsStore.meta.total }} {{ t('leads.total') }}</p>
         </div>
         <div class="flex items-center gap-2 shrink-0">
           <AppButton variant="secondary" size="sm" @click="showFilters = !showFilters">
             <template #icon><Filter class="w-4 h-4" /></template>
-            Filters
+            {{ t('common.filter') }}
             <span
               v-if="leadsStore.activeFiltersCount"
               class="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary text-white text-[10px] font-bold"
             >{{ leadsStore.activeFiltersCount }}</span>
           </AppButton>
-          <AppButton size="sm" class="!bg-white !text-primary hover:!bg-indigo-50" @click="router.push({ name: 'leads.create' })">
+          <AppButton
+            v-if="auth.can('LEADS_CREATE')"
+            size="sm"
+            class="!bg-white !text-primary hover:!bg-indigo-50"
+            @click="router.push({ name: 'leads.create' })"
+          >
             <template #icon><Plus class="w-4 h-4" /></template>
-            New Lead
+            {{ t('leads.newLead') }}
           </AppButton>
         </div>
       </div>
@@ -179,16 +189,18 @@ const to = computed(() =>
         :sort-key="leadsStore.filters.sort_by"
         :sort-dir="leadsStore.filters.sort_dir"
         row-key="id"
-        empty-title="No leads found"
-        empty-description="Adjust your filters or create a new lead."
+        :empty-title="t('leads.noLeads')"
+        :empty-description="t('leads.noLeadsDesc')"
         @sort="onSort"
         @row-click="(row) => router.push({ name: 'leads.detail', params: { id: row.id } })"
       >
         <template #cell-name="{ row }">
-          <div class="flex items-center gap-2.5">
-            <AppAvatar :name="row.name" size="sm" />
-            <div class="min-w-0">
-              <p class="font-medium text-gray-900 truncate leading-tight">{{ row.name }}</p>
+          <div class="flex items-center gap-2.5 min-w-0 max-w-[220px]">
+            <AppAvatar :name="`${row.first_name ?? ''} ${row.last_name ?? ''}`" size="sm" class="shrink-0" />
+            <div class="min-w-0 flex-1">
+              <p class="font-medium text-gray-900 text-sm truncate leading-tight">
+                {{ [row.first_name, row.last_name].filter(Boolean).join(' ') || '—' }}
+              </p>
               <p v-if="row.email" class="text-xs text-gray-400 truncate">{{ row.email }}</p>
             </div>
           </div>
@@ -211,17 +223,17 @@ const to = computed(() =>
         </template>
 
         <template #cell-source="{ row }">
-          <span class="text-sm text-gray-600">{{ row.source?.name ?? '—' }}</span>
+          <span class="text-sm text-gray-600">{{ row.lead_source?.name ?? '—' }}</span>
         </template>
 
         <template #cell-assigned_to="{ row }">
-          <div v-if="row.assigned_to" class="flex items-center gap-1.5">
-            <AppAvatar :name="row.assigned_to.name" size="xs" />
-            <span class="text-sm text-gray-700 truncate max-w-[100px]">{{ row.assigned_to.name }}</span>
+          <div v-if="row.assigned_agent" class="flex items-center gap-1.5">
+            <AppAvatar :name="row.assigned_agent.name" size="xs" />
+            <span class="text-sm text-gray-700 truncate max-w-[100px]">{{ row.assigned_agent.name }}</span>
           </div>
           <div v-else class="flex items-center gap-1 text-gray-400">
             <UserCircle class="w-4 h-4" />
-            <span class="text-xs">Unassigned</span>
+            <span class="text-xs">{{ t('common.unassigned') }}</span>
           </div>
         </template>
 
@@ -232,19 +244,21 @@ const to = computed(() =>
         <template #cell-actions="{ row }">
           <div class="flex items-center justify-end gap-1" @click.stop>
             <AppButton
+              v-if="auth.can('LEADS_UPDATE')"
               variant="ghost"
               size="sm"
               @click="router.push({ name: 'leads.edit', params: { id: row.id } })"
             >
-              Edit
+              {{ t('common.edit') }}
             </AppButton>
             <AppButton
+              v-if="auth.can('LEADS_DELETE')"
               variant="ghost"
               size="sm"
               class="!text-danger hover:!bg-danger-bg"
               @click="handleDelete(row)"
             >
-              Delete
+              {{ t('common.delete') }}
             </AppButton>
           </div>
         </template>

@@ -91,8 +91,8 @@ async function handleDelete() {
             </div>
             <div class="flex items-center gap-2 mt-1.5">
               <AppBadge
-                :variant="store.current.role === 'super_admin' ? 'danger' : store.current.role === 'manager' ? 'warning' : 'info'"
-                :label="ROLES[store.current.role] ?? store.current.role"
+                :variant="store.current.roles?.[0] === 'super_admin' ? 'danger' : store.current.roles?.[0] === 'manager' ? 'warning' : 'info'"
+                :label="ROLES[store.current.roles?.[0]] ?? store.current.roles?.[0] ?? '—'"
               />
               <span v-if="store.current.team" class="flex items-center gap-1 text-xs text-gray-500">
                 <Users class="w-3.5 h-3.5" />

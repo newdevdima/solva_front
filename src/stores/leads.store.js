@@ -35,6 +35,7 @@ export const useLeadsStore = defineStore('leads', () => {
   })
 
   const errors = ref(null)
+  let _listGen = 0  // incremented on every fetchList call; stale responses are dropped
 
   const activeFiltersCount = computed(() => {
     const { search, status, insurance_type, source_id, assigned_to, from, to } = filters
@@ -42,16 +43,18 @@ export const useLeadsStore = defineStore('leads', () => {
   })
 
   async function fetchList() {
+    const gen = ++_listGen
     loading.list = true
     errors.value = null
     try {
       const { data, meta: m } = await leadsApi.list(_buildParams())
+      if (gen !== _listGen) return  // a newer request already fired; discard this response
       list.value = data
       if (m) meta.value = m
     } catch (e) {
-      errors.value = e
+      if (gen === _listGen) errors.value = e
     } finally {
-      loading.list = false
+      if (gen === _listGen) loading.list = false
     }
   }
 

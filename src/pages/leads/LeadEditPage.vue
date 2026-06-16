@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft } from 'lucide-vue-next'
 import { useLeadsStore } from '@/stores/leads.store'
@@ -23,7 +23,8 @@ const toast = useToast()
 
 const id = route.params.id
 const form = reactive({
-  name: '',
+  first_name: '',
+  last_name: '',
   email: '',
   phone: '',
   insurance_type: '',
@@ -35,6 +36,12 @@ const errors = ref({})
 const agentOptions = ref([{ value: '', label: 'Unassigned' }])
 const sourceOptions = ref([{ value: '', label: 'No Source' }])
 
+const fullName = computed(() => {
+  const lead = leadsStore.current
+  if (!lead) return ''
+  return [lead.first_name, lead.last_name].filter(Boolean).join(' ')
+})
+
 onMounted(async () => {
   try {
     await Promise.all([
@@ -44,12 +51,13 @@ onMounted(async () => {
     ])
     const lead = leadsStore.current
     if (lead) {
-      form.name = lead.name ?? ''
+      form.first_name = lead.first_name ?? ''
+      form.last_name = lead.last_name ?? ''
       form.email = lead.email ?? ''
       form.phone = lead.phone ?? ''
       form.insurance_type = lead.insurance_type ?? ''
-      form.source_id = lead.source?.id ?? ''
-      form.assigned_to = lead.assigned_to?.id ?? ''
+      form.source_id = lead.lead_source?.id ?? ''
+      form.assigned_to = lead.assigned_agent?.id ?? ''
     }
     sourceOptions.value = [
       { value: '', label: 'No Source' },
@@ -67,7 +75,8 @@ onMounted(async () => {
 
 function validate() {
   errors.value = {}
-  if (!form.name.trim()) errors.value.name = 'Name is required'
+  if (!form.first_name.trim()) errors.value.first_name = 'First name is required'
+  if (!form.last_name.trim()) errors.value.last_name = 'Last name is required'
   if (!form.phone.trim()) errors.value.phone = 'Phone is required'
   if (!form.insurance_type) errors.value.insurance_type = 'Insurance type is required'
   return Object.keys(errors.value).length === 0
@@ -76,9 +85,15 @@ function validate() {
 async function submit() {
   if (!validate()) return
   try {
-    const payload = { ...form }
-    if (!payload.source_id) delete payload.source_id
-    if (!payload.assigned_to) delete payload.assigned_to
+    const payload = {
+      first_name: form.first_name,
+      last_name: form.last_name,
+      phone: form.phone,
+      email: form.email || undefined,
+      insurance_type: form.insurance_type,
+    }
+    if (form.source_id) payload.source_id = form.source_id
+    if (form.assigned_to) payload.assigned_to = form.assigned_to
     await leadsStore.update(id, payload)
     toast.showSuccess('Lead updated')
     router.push({ name: 'leads.detail', params: { id } })
@@ -103,9 +118,7 @@ async function submit() {
       </AppButton>
       <div>
         <h1 class="text-xl font-semibold text-gray-900">Edit Lead</h1>
-        <p v-if="leadsStore.current" class="text-sm text-gray-500 mt-0.5">
-          {{ leadsStore.current.name }}
-        </p>
+        <p v-if="fullName" class="text-sm text-gray-500 mt-0.5">{{ fullName }}</p>
       </div>
     </div>
 
@@ -121,9 +134,15 @@ async function submit() {
           <h2 class="text-sm font-semibold text-gray-700 mb-3">Personal Information</h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <AppInput
-              v-model="form.name"
-              label="Full Name"
-              :error="errors.name"
+              v-model="form.first_name"
+              label="First Name"
+              :error="errors.first_name"
+              required
+            />
+            <AppInput
+              v-model="form.last_name"
+              label="Last Name"
+              :error="errors.last_name"
               required
             />
             <AppInput
@@ -138,7 +157,6 @@ async function submit() {
               label="Email"
               type="email"
               :error="errors.email"
-              class="sm:col-span-2"
             />
           </div>
         </div>

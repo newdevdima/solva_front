@@ -22,18 +22,21 @@ export const useLeadImportsStore = defineStore('leadImports', () => {
 
   const errors = ref(null)
   const uploadProgress = ref(0)
+  let _listGen = 0
 
   async function fetchList() {
+    const gen = ++_listGen
     loading.list = true
     errors.value = null
     try {
       const { data, meta: m } = await leadImportsApi.list(_buildParams())
+      if (gen !== _listGen) return
       list.value = data
       if (m) meta.value = m
     } catch (e) {
-      errors.value = e
+      if (gen === _listGen) errors.value = e
     } finally {
-      loading.list = false
+      if (gen === _listGen) loading.list = false
     }
   }
 

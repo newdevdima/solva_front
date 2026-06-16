@@ -1,5 +1,6 @@
 <script setup>
 import { reactive, ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth.store'
 import { useToast } from '@/composables/useToast'
 import { authApi } from '@/api/auth'
@@ -13,6 +14,7 @@ import { formatDate } from '@/utils/formatters'
 
 const auth = useAuthStore()
 const toast = useToast()
+const { t } = useI18n()
 
 const profileForm = reactive({
   name: auth.user?.name ?? '',
@@ -30,7 +32,10 @@ const passwordErrors = ref({})
 const savingProfile = ref(false)
 const savingPassword = ref(false)
 
-const roleLabel = computed(() => ROLES[auth.user?.role ?? ''] ?? auth.user?.role ?? '—')
+const roleLabel = computed(() => {
+  const r = auth.user?.roles?.[0] ?? auth.user?.role ?? ''
+  return ROLES[r] ?? r ?? '—'
+})
 
 function validateProfile() {
   profileErrors.value = {}
@@ -45,7 +50,7 @@ async function saveProfile() {
   try {
     await authApi.updateProfile(profileForm)
     await auth.boot()
-    toast.showSuccess('Profile updated')
+    toast.showSuccess(t('profile.updateSuccess'))
   } catch (e) {
     if (e?.errors) {
       profileErrors.value = Object.fromEntries(
@@ -75,7 +80,7 @@ async function savePassword() {
   savingPassword.value = true
   try {
     await authApi.changePassword(passwordForm)
-    toast.showSuccess('Password changed successfully')
+    toast.showSuccess(t('profile.passwordSuccess'))
     Object.assign(passwordForm, { current_password: '', password: '', password_confirmation: '' })
   } catch (e) {
     if (e?.errors) {
@@ -98,8 +103,8 @@ async function savePassword() {
       <div class="pointer-events-none absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/5" />
       <div class="pointer-events-none absolute -bottom-10 -right-20 w-56 h-56 rounded-full bg-white/5" />
       <div class="relative z-10">
-        <h1 class="text-2xl font-bold text-white">My Profile</h1>
-        <p class="text-sm text-indigo-200 mt-0.5">Manage your account settings.</p>
+        <h1 class="text-2xl font-bold text-white">{{ t('profile.title') }}</h1>
+        <p class="text-sm text-indigo-200 mt-0.5">{{ t('profile.subtitle') }}</p>
       </div>
     </div>
 
@@ -112,7 +117,7 @@ async function savePassword() {
           <p class="text-sm text-gray-500">{{ auth.user?.email }}</p>
           <div class="flex items-center gap-2 mt-2">
             <AppBadge
-              :variant="auth.user?.role === 'super_admin' ? 'danger' : auth.user?.role === 'manager' ? 'warning' : 'info'"
+              :variant="(auth.user?.roles?.[0] ?? auth.user?.role) === 'super_admin' ? 'danger' : (auth.user?.roles?.[0] ?? auth.user?.role) === 'manager' ? 'warning' : 'info'"
               :label="roleLabel"
             />
             <span v-if="auth.user?.team" class="text-xs text-gray-500">
@@ -128,34 +133,34 @@ async function savePassword() {
 
     <!-- Edit profile -->
     <AppCard>
-      <h2 class="text-sm font-semibold text-gray-700 mb-4">Edit Profile</h2>
+      <h2 class="text-sm font-semibold text-gray-700 mb-4">{{ t('profile.editProfile') }}</h2>
       <form class="space-y-4" @submit.prevent="saveProfile">
         <AppInput
           v-model="profileForm.name"
-          label="Full Name"
+          :label="t('users.name')"
           :error="profileErrors.name"
           required
         />
         <AppInput
           v-model="profileForm.email"
-          label="Email"
+          :label="t('users.email')"
           type="email"
           :error="profileErrors.email"
           required
         />
         <div class="flex justify-end">
-          <AppButton type="submit" :loading="savingProfile">Save Changes</AppButton>
+          <AppButton type="submit" :loading="savingProfile">{{ t('profile.saveChanges') }}</AppButton>
         </div>
       </form>
     </AppCard>
 
     <!-- Change password -->
     <AppCard>
-      <h2 class="text-sm font-semibold text-gray-700 mb-4">Change Password</h2>
+      <h2 class="text-sm font-semibold text-gray-700 mb-4">{{ t('profile.changePassword') }}</h2>
       <form class="space-y-4" @submit.prevent="savePassword">
         <AppInput
           v-model="passwordForm.current_password"
-          label="Current Password"
+          :label="t('profile.currentPassword')"
           type="password"
           :error="passwordErrors.current_password"
           required
@@ -163,7 +168,7 @@ async function savePassword() {
         />
         <AppInput
           v-model="passwordForm.password"
-          label="New Password"
+          :label="t('profile.newPassword')"
           type="password"
           :error="passwordErrors.password"
           required
@@ -171,14 +176,14 @@ async function savePassword() {
         />
         <AppInput
           v-model="passwordForm.password_confirmation"
-          label="Confirm New Password"
+          :label="t('profile.confirmPassword')"
           type="password"
           :error="passwordErrors.password_confirmation"
           required
           autocomplete="new-password"
         />
         <div class="flex justify-end">
-          <AppButton type="submit" :loading="savingPassword">Change Password</AppButton>
+          <AppButton type="submit" :loading="savingPassword">{{ t('profile.changePassword') }}</AppButton>
         </div>
       </form>
     </AppCard>

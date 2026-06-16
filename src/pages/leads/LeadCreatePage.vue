@@ -20,7 +20,8 @@ const usersStore = useUsersStore()
 const toast = useToast()
 
 const form = reactive({
-  name: '',
+  first_name: '',
+  last_name: '',
   email: '',
   phone: '',
   insurance_type: '',
@@ -48,7 +49,8 @@ onMounted(async () => {
 
 function validate() {
   errors.value = {}
-  if (!form.name.trim()) errors.value.name = 'Name is required'
+  if (!form.first_name.trim()) errors.value.first_name = 'First name is required'
+  if (!form.last_name.trim()) errors.value.last_name = 'Last name is required'
   if (!form.phone.trim()) errors.value.phone = 'Phone is required'
   if (!form.insurance_type) errors.value.insurance_type = 'Insurance type is required'
   return Object.keys(errors.value).length === 0
@@ -57,10 +59,16 @@ function validate() {
 async function submit() {
   if (!validate()) return
   try {
-    const payload = { ...form }
-    if (!payload.source_id) delete payload.source_id
-    if (!payload.assigned_to) delete payload.assigned_to
-    if (!payload.notes) delete payload.notes
+    const payload = {
+      first_name: form.first_name,
+      last_name: form.last_name,
+      phone: form.phone,
+      email: form.email || undefined,
+      insurance_type: form.insurance_type,
+    }
+    if (form.source_id) payload.source_id = form.source_id
+    if (form.assigned_to) payload.assigned_to = form.assigned_to
+    if (form.notes) payload.notes = form.notes
     const lead = await leadsStore.create(payload)
     toast.showSuccess('Lead created successfully')
     router.push({ name: 'leads.detail', params: { id: lead.id } })
@@ -97,10 +105,17 @@ async function submit() {
           <h2 class="text-sm font-semibold text-gray-700 mb-3">Personal Information</h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <AppInput
-              v-model="form.name"
-              label="Full Name"
-              placeholder="John Doe"
-              :error="errors.name"
+              v-model="form.first_name"
+              label="First Name"
+              placeholder="Jean"
+              :error="errors.first_name"
+              required
+            />
+            <AppInput
+              v-model="form.last_name"
+              label="Last Name"
+              placeholder="Dupont"
+              :error="errors.last_name"
               required
             />
             <AppInput
@@ -115,9 +130,8 @@ async function submit() {
               v-model="form.email"
               label="Email"
               type="email"
-              placeholder="john@example.com"
+              placeholder="jean@example.com"
               :error="errors.email"
-              class="sm:col-span-2"
             />
           </div>
         </div>

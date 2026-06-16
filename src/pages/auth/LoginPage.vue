@@ -1,6 +1,7 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUiStore } from '@/stores/ui.store'
 import AppInput from '@/components/base/AppInput.vue'
@@ -11,6 +12,7 @@ const auth = useAuthStore()
 const ui = useUiStore()
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 
 const form = reactive({ email: '', password: '' })
 const errors = reactive({ email: '', password: '', general: '' })
@@ -21,8 +23,8 @@ function validate() {
   errors.password = ''
   errors.general = ''
   let ok = true
-  if (!form.email) { errors.email = 'Email is required.'; ok = false }
-  if (!form.password) { errors.password = 'Password is required.'; ok = false }
+  if (!form.email) { errors.email = t('auth.email') + ' is required.'; ok = false }
+  if (!form.password) { errors.password = t('auth.password') + ' is required.'; ok = false }
   return ok
 }
 
@@ -50,8 +52,8 @@ async function submit() {
 
 <template>
   <div>
-    <h2 class="text-2xl font-bold text-gray-900 mb-1">Welcome back</h2>
-    <p class="text-sm text-gray-500 mb-8">Sign in to your CRM account</p>
+    <h2 class="text-2xl font-bold text-gray-900 mb-1">{{ t('auth.loginTitle') }}</h2>
+    <p class="text-sm text-gray-500 mb-8">{{ t('auth.loginSubtitle') }}</p>
 
     <form class="flex flex-col gap-5" @submit.prevent="submit">
       <!-- General error -->
@@ -64,7 +66,7 @@ async function submit() {
 
       <AppInput
         v-model="form.email"
-        label="Email address"
+        :label="t('auth.email')"
         type="email"
         placeholder="you@example.com"
         :error="errors.email"
@@ -76,7 +78,7 @@ async function submit() {
 
       <AppInput
         v-model="form.password"
-        label="Password"
+        :label="t('auth.password')"
         type="password"
         placeholder="••••••••"
         :error="errors.password"
@@ -93,7 +95,7 @@ async function submit() {
         :loading="loading"
         class="w-full mt-2"
       >
-        Sign in
+        {{ t('auth.login') }}
       </AppButton>
     </form>
 

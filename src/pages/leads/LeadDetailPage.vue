@@ -1,9 +1,10 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Edit2, Trash2, UserPlus } from 'lucide-vue-next'
 import { useLeadsStore } from '@/stores/leads.store'
 import { useUiStore } from '@/stores/ui.store'
+import { useAuthStore } from '@/stores/auth.store'
 import { useToast } from '@/composables/useToast'
 import AppCard from '@/components/base/AppCard.vue'
 import AppButton from '@/components/base/AppButton.vue'
@@ -20,6 +21,7 @@ const route = useRoute()
 const router = useRouter()
 const leadsStore = useLeadsStore()
 const ui = useUiStore()
+const auth = useAuthStore()
 const toast = useToast()
 
 const id = route.params.id
@@ -27,6 +29,12 @@ const activeTab = ref('notes')
 const showAssignModal = ref(false)
 const statusChanging = ref(false)
 const noteSubmitting = ref(false)
+
+const leadFullName = computed(() => {
+  const c = leadsStore.current
+  if (!c) return ''
+  return [c.first_name, c.last_name].filter(Boolean).join(' ')
+})
 
 const TABS = [
   { key: 'notes', label: 'Notes' },
@@ -88,7 +96,7 @@ async function onTabChange(tab) {
 }
 
 async function handleDelete() {
-  const ok = await ui.confirm('Delete Lead', `Delete "${leadsStore.current?.name}"? This cannot be undone.`)
+  const ok = await ui.confirm('Delete Lead', `Delete "${leadFullName.value}"? This cannot be undone.`)
   if (!ok) return
   try {
     await leadsStore.remove(id)
@@ -99,7 +107,6 @@ async function handleDelete() {
   }
 }
 
-const lead = () => leadsStore.current
 </script>
 
 <template>
@@ -127,9 +134,9 @@ const lead = () => leadsStore.current
     <AppCard v-else-if="leadsStore.current">
       <div class="flex items-start justify-between gap-4 flex-wrap">
         <div class="flex items-start gap-4">
-          <AppAvatar :name="leadsStore.current.name" size="lg" />
+          <AppAvatar :name="leadFullName" size="lg" />
           <div>
-            <h1 class="text-xl font-semibold text-gray-900">{{ leadsStore.current.name }}</h1>
+            <h1 class="text-xl font-semibold text-gray-900">{{ leadFullName }}</h1>
             <p v-if="leadsStore.current.email" class="text-sm text-gray-500 mt-0.5">
               {{ leadsStore.current.email }}
             </p>
@@ -160,6 +167,7 @@ const lead = () => leadsStore.current
             Assign
           </AppButton>
           <AppButton
+            v-if="auth.can('LEADS_UPDATE')"
             variant="ghost"
             size="sm"
             @click="router.push({ name: 'leads.edit', params: { id } })"
@@ -168,6 +176,7 @@ const lead = () => leadsStore.current
             Edit
           </AppButton>
           <AppButton
+            v-if="auth.can('LEADS_DELETE')"
             variant="ghost"
             size="sm"
             class="!text-danger"
@@ -179,10 +188,10 @@ const lead = () => leadsStore.current
       </div>
 
       <!-- Assignment info -->
-      <div v-if="leadsStore.current.assigned_to" class="mt-4 pt-4 border-t border-gray-100 flex items-center gap-2">
+      <div v-if="leadsStore.current.assigned_agent" class="mt-4 pt-4 border-t border-gray-100 flex items-center gap-2">
         <span class="text-xs text-gray-400">Assigned to</span>
-        <AppAvatar :name="leadsStore.current.assigned_to.name" size="xs" />
-        <span class="text-sm font-medium text-gray-700">{{ leadsStore.current.assigned_to.name }}</span>
+        <AppAvatar :name="leadsStore.current.assigned_agent.name" size="xs" />
+        <span class="text-sm font-medium text-gray-700">{{ leadsStore.current.assigned_agent.name }}</span>
         <span class="text-xs text-gray-400 ml-auto">Created {{ formatDate(leadsStore.current.created_at) }}</span>
       </div>
     </AppCard>
@@ -231,7 +240,7 @@ const lead = () => leadsStore.current
         <div v-else-if="activeTab === 'info'" class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
           <div>
             <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Source</p>
-            <p class="text-sm text-gray-900">{{ leadsStore.current.source?.name ?? '—' }}</p>
+            <p class="text-sm text-gray-900">{{ leadsStore.current.lead_source?.name ?? '—' }}</p>
           </div>
           <div>
             <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Insurance Type</p>
@@ -254,7 +263,7 @@ const lead = () => leadsStore.current
     <!-- Assign modal -->
     <LeadAssignModal
       :open="showAssignModal"
-      :current-assignee-id="leadsStore.current?.assigned_to?.id ?? null"
+      :current-assignee-id="leadsStore.current?.assigned_agent?.id ?? null"
       :loading="leadsStore.loading.action"
       @close="showAssignModal = false"
       @assign="onAssign"
