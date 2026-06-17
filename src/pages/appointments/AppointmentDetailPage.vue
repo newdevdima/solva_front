@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Edit2, Trash2, Clock, Calendar } from 'lucide-vue-next'
 import { useAppointmentsStore } from '@/stores/appointments.store'
@@ -24,6 +24,12 @@ const toast = useToast()
 const id = route.params.id
 const showReschedule = ref(false)
 const activeTab = ref('reminders')
+
+const leadFullName = computed(() => {
+  const lead = store.current?.lead
+  if (!lead) return 'Appointment'
+  return [lead.first_name, lead.last_name].filter(Boolean).join(' ') || 'Appointment'
+})
 
 const TABS = [
   { key: 'reminders', label: 'Reminders' },
@@ -89,6 +95,14 @@ async function handleDelete() {
         <template #icon><ArrowLeft class="w-4 h-4" /></template>
         Back
       </AppButton>
+      <AppButton
+        v-if="store.current?.lead?.id"
+        variant="ghost"
+        size="sm"
+        @click="router.push({ name: 'leads.detail', params: { id: store.current.lead.id } })"
+      >
+        View Lead
+      </AppButton>
     </div>
 
     <!-- Loading -->
@@ -109,18 +123,16 @@ async function handleDelete() {
           </div>
           <div>
             <div class="flex items-center gap-2 flex-wrap">
-              <h1 class="text-xl font-semibold text-gray-900">
-                {{ store.current.lead?.name ?? 'Appointment' }}
-              </h1>
+              <h1 class="text-xl font-semibold text-gray-900">{{ leadFullName }}</h1>
               <AppointmentStatusBadge :status="store.current.status" dot />
             </div>
             <div class="flex items-center gap-1.5 mt-1 text-sm text-gray-500">
               <Clock class="w-4 h-4" />
               <span>{{ formatDateTime(store.current.scheduled_at) }}</span>
             </div>
-            <div v-if="store.current.assigned_to" class="flex items-center gap-1.5 mt-1.5">
-              <AppAvatar :name="store.current.assigned_to.name" size="xs" />
-              <span class="text-sm text-gray-600">{{ store.current.assigned_to.name }}</span>
+            <div v-if="store.current.assigned_agent" class="flex items-center gap-1.5 mt-1.5">
+              <AppAvatar :name="store.current.assigned_agent.name" size="xs" />
+              <span class="text-sm text-gray-600">{{ store.current.assigned_agent.name }}</span>
             </div>
           </div>
         </div>
@@ -188,7 +200,7 @@ async function handleDelete() {
         <div v-else-if="activeTab === 'info'" class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
           <div>
             <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Lead</p>
-            <p class="text-sm text-gray-900">{{ store.current.lead?.name ?? '—' }}</p>
+            <p class="text-sm text-gray-900">{{ leadFullName !== 'Appointment' ? leadFullName : '—' }}</p>
           </div>
           <div>
             <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Phone</p>

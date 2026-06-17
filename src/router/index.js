@@ -59,6 +59,14 @@ const router = createRouter({
       meta: { requiresAuth: true, layout: 'dashboard', permission: 'LEADS_UPDATE', title: 'Edit Lead' },
     },
 
+    /* Calendar */
+    {
+      path: '/calendar',
+      name: 'calendar',
+      component: () => import('@/pages/calendar/CalendarPage.vue'),
+      meta: { requiresAuth: true, layout: 'dashboard', permission: 'APPOINTMENTS_VIEW_*', title: 'Calendar' },
+    },
+
     /* Appointments */
     {
       path: '/appointments',
@@ -67,8 +75,8 @@ const router = createRouter({
       meta: { requiresAuth: true, layout: 'dashboard', permission: '', title: 'Appointments' },
     },
     {
-      path: '/appointments/create',
-      name: 'appointments.create',
+      path: '/leads/:leadId/appointments/create',
+      name: 'leads.appointments.create',
       component: () => import('@/pages/appointments/AppointmentCreatePage.vue'),
       meta: { requiresAuth: true, layout: 'dashboard', permission: 'APPOINTMENTS_CREATE', title: 'New Appointment' },
     },

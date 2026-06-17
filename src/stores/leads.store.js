@@ -8,6 +8,7 @@ export const useLeadsStore = defineStore('leads', () => {
   const notes = ref([])
   const statusHistory = ref([])
   const assignmentHistory = ref([])
+  const leadAppointments = ref([])
 
   const meta = ref({ total: 0, per_page: 15, current_page: 1, last_page: 1 })
 
@@ -31,6 +32,7 @@ export const useLeadsStore = defineStore('leads', () => {
     form: false,
     notes: false,
     history: false,
+    appointments: false,
     action: false,
   })
 
@@ -200,6 +202,33 @@ export const useLeadsStore = defineStore('leads', () => {
     }
   }
 
+  async function fetchLeadAppointments(leadId) {
+    loading.appointments = true
+    try {
+      const { data } = await leadsApi.appointments.list(leadId)
+      leadAppointments.value = data
+    } catch (e) {
+      errors.value = e
+    } finally {
+      loading.appointments = false
+    }
+  }
+
+  async function createLeadAppointment(leadId, payload) {
+    loading.form = true
+    errors.value = null
+    try {
+      const { data } = await leadsApi.appointments.create(leadId, payload)
+      leadAppointments.value.unshift(data)
+      return data
+    } catch (e) {
+      errors.value = e
+      throw e
+    } finally {
+      loading.form = false
+    }
+  }
+
   function setFilter(key, value) {
     filters[key] = value
     if (key !== 'page') filters.page = 1
@@ -236,6 +265,7 @@ export const useLeadsStore = defineStore('leads', () => {
     notes,
     statusHistory,
     assignmentHistory,
+    leadAppointments,
     meta,
     filters,
     loading,
@@ -252,6 +282,8 @@ export const useLeadsStore = defineStore('leads', () => {
     addNote,
     fetchStatusHistory,
     fetchAssignmentHistory,
+    fetchLeadAppointments,
+    createLeadAppointment,
     setFilter,
     resetFilters,
   }

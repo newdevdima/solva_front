@@ -2,7 +2,7 @@
 import { onMounted, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { Plus, Filter, X, Calendar } from 'lucide-vue-next'
+import { Filter, X, Calendar } from 'lucide-vue-next'
 import { useAppointmentsStore } from '@/stores/appointments.store'
 import { useUiStore } from '@/stores/ui.store'
 import { useAuthStore } from '@/stores/auth.store'
@@ -92,15 +92,6 @@ async function handleStatusChange(row, status) {
               v-if="store.activeFiltersCount"
               class="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary text-white text-[10px] font-bold"
             >{{ store.activeFiltersCount }}</span>
-          </AppButton>
-          <AppButton
-            v-if="auth.can('APPOINTMENTS_CREATE')"
-            size="sm"
-            class="!bg-white !text-primary hover:!bg-indigo-50"
-            @click="router.push({ name: 'appointments.create' })"
-          >
-            <template #icon><Plus class="w-4 h-4" /></template>
-            {{ t('appointments.newAppointment') }}
           </AppButton>
         </div>
       </div>
@@ -192,8 +183,10 @@ async function handleStatusChange(row, status) {
       >
         <template #cell-lead="{ row }">
           <div v-if="row.lead" class="flex items-center gap-2">
-            <AppAvatar :name="row.lead.name" size="sm" />
-            <span class="font-medium text-gray-900 text-sm">{{ row.lead.name }}</span>
+            <AppAvatar :name="`${row.lead.first_name ?? ''} ${row.lead.last_name ?? ''}`" size="sm" />
+            <span class="font-medium text-gray-900 text-sm">
+              {{ [row.lead.first_name, row.lead.last_name].filter(Boolean).join(' ') || '—' }}
+            </span>
           </div>
           <span v-else class="text-gray-400 text-sm">—</span>
         </template>
@@ -220,9 +213,9 @@ async function handleStatusChange(row, status) {
         </template>
 
         <template #cell-assigned_to="{ row }">
-          <div v-if="row.assigned_to" class="flex items-center gap-1.5">
-            <AppAvatar :name="row.assigned_to.name" size="xs" />
-            <span class="text-sm text-gray-700">{{ row.assigned_to.name }}</span>
+          <div v-if="row.assigned_agent" class="flex items-center gap-1.5">
+            <AppAvatar :name="row.assigned_agent.name" size="xs" />
+            <span class="text-sm text-gray-700">{{ row.assigned_agent.name }}</span>
           </div>
           <span v-else class="text-gray-400 text-sm">—</span>
         </template>

@@ -1,9 +1,10 @@
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft } from 'lucide-vue-next'
 import { useAppointmentsStore } from '@/stores/appointments.store'
 import { useUsersStore } from '@/stores/users.store'
+import { useAuthStore } from '@/stores/auth.store'
 import { useToast } from '@/composables/useToast'
 import AppCard from '@/components/base/AppCard.vue'
 import AppButton from '@/components/base/AppButton.vue'
@@ -17,14 +18,16 @@ const route = useRoute()
 const router = useRouter()
 const store = useAppointmentsStore()
 const usersStore = useUsersStore()
+const auth = useAuthStore()
 const toast = useToast()
 
 const id = route.params.id
+const isAgent = computed(() => auth.hasRole('agent'))
 
 const form = reactive({
   scheduled_at: '',
   status: '',
-  assigned_to: '',
+  agent_id: '',
   notes: '',
 })
 const errors = ref({})
@@ -32,18 +35,24 @@ const agentOptions = ref([{ value: '', label: 'Unassigned' }])
 
 onMounted(async () => {
   try {
-    await Promise.all([store.fetchOne(id), usersStore.fetchList({ role: 'agent', per_page: 100 })])
+    const promises = [store.fetchOne(id)]
+    if (!isAgent.value) {
+      promises.push(usersStore.fetchList({ role: 'agent', per_page: 100 }))
+    }
+    await Promise.all(promises)
     const apt = store.current
     if (apt) {
       form.scheduled_at = apt.scheduled_at ? apt.scheduled_at.slice(0, 16) : ''
       form.status = apt.status ?? ''
-      form.assigned_to = apt.assigned_to?.id ?? ''
+      form.agent_id = apt.assigned_agent?.id ?? ''
       form.notes = apt.notes ?? ''
     }
-    agentOptions.value = [
-      { value: '', label: 'Unassigned' },
-      ...usersStore.list.map((u) => ({ value: u.id, label: u.name })),
-    ]
+    if (!isAgent.value) {
+      agentOptions.value = [
+        { value: '', label: 'Unassigned' },
+        ...usersStore.list.map((u) => ({ value: u.id, label: u.name })),
+      ]
+    }
   } catch {
     toast.showError('Failed to load appointment')
     router.replace({ name: 'appointments' })
@@ -60,7 +69,7 @@ async function submit() {
   if (!validate()) return
   try {
     const payload = { ...form }
-    if (!payload.assigned_to) delete payload.assigned_to
+    if (!payload.agent_id) delete payload.agent_id
     await store.update(id, payload)
     toast.showSuccess('Appointment updated')
     router.push({ name: 'appointments.detail', params: { id } })
@@ -109,9 +118,13 @@ async function submit() {
             label="Status"
             :options="APPOINTMENT_STATUS_OPTIONS"
           />
+          <div v-if="isAgent" class="sm:col-span-2 p-3 rounded-xl bg-gray-50 text-sm text-gray-600">
+            Assigned to: <span class="font-medium text-gray-900">{{ auth.user?.name ?? 'You' }}</span>
+          </div>
           <AppSelect
-            v-model="form.assigned_to"
-            label="Assigned To"
+            v-else
+            v-model="form.agent_id"
+            label="Assign To Agent"
             :options="agentOptions"
             class="sm:col-span-2"
           />

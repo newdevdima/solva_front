@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Users,
   CalendarDays,
+  CalendarRange,
   Upload,
   UsersRound,
   UserCog,
@@ -53,6 +54,7 @@ const navGroups = computed(() => [
     items: [
       { icon: Users, label: t('nav.leads'), to: '/leads', permission: 'LEADS_VIEW_*' },
       { icon: CalendarDays, label: t('nav.appointments'), to: '/appointments', permission: 'APPOINTMENTS_VIEW_*' },
+      { icon: CalendarRange, label: t('nav.calendar'), to: '/calendar', permission: 'APPOINTMENTS_VIEW_*' },
       { icon: Upload, label: t('nav.importLeads'), to: '/lead-imports', permission: 'LEADS_IMPORT' },
     ],
   },

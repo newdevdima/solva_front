@@ -1,54 +1,69 @@
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { reactive, ref, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft } from 'lucide-vue-next'
-import { useAppointmentsStore } from '@/stores/appointments.store'
 import { useLeadsStore } from '@/stores/leads.store'
 import { useUsersStore } from '@/stores/users.store'
+import { useAuthStore } from '@/stores/auth.store'
 import { useToast } from '@/composables/useToast'
 import AppCard from '@/components/base/AppCard.vue'
 import AppButton from '@/components/base/AppButton.vue'
 import AppInput from '@/components/base/AppInput.vue'
 import AppSelect from '@/components/base/AppSelect.vue'
 import AppTextarea from '@/components/base/AppTextarea.vue'
-import { APPOINTMENT_STATUS_OPTIONS, REMINDER_CHANNEL_OPTIONS } from '@/utils/enums'
+import AppSkeleton from '@/components/base/AppSkeleton.vue'
+import { APPOINTMENT_STATUS_OPTIONS } from '@/utils/enums'
 
+const route = useRoute()
 const router = useRouter()
-const store = useAppointmentsStore()
 const leadsStore = useLeadsStore()
 const usersStore = useUsersStore()
+const auth = useAuthStore()
 const toast = useToast()
 
+const leadId = route.params.leadId
+
+const isAgent = computed(() => auth.hasRole('agent'))
+
 const form = reactive({
-  lead_id: '',
-  assigned_to: '',
+  agent_id: '',
   scheduled_at: '',
   status: 'PLANIFIE',
   notes: '',
 })
 const errors = ref({})
-
-const leadOptions = ref([{ value: '', label: 'Select lead…' }])
 const agentOptions = ref([{ value: '', label: 'Unassigned' }])
 
+const leadFullName = computed(() => {
+  const l = leadsStore.current
+  if (!l || String(l.id) !== String(leadId)) return ''
+  return [l.first_name, l.last_name].filter(Boolean).join(' ')
+})
+
 onMounted(async () => {
-  await Promise.all([
-    leadsStore.fetchList({ per_page: 100 }),
-    usersStore.fetchList({ role: 'agent', per_page: 100 }),
-  ])
-  leadOptions.value = [
-    { value: '', label: 'Select lead…' },
-    ...leadsStore.list.map((l) => ({ value: l.id, label: `${l.name} — ${l.phone ?? l.email ?? ''}` })),
-  ]
-  agentOptions.value = [
-    { value: '', label: 'Unassigned' },
-    ...usersStore.list.map((u) => ({ value: u.id, label: u.name })),
-  ]
+  try {
+    const promises = [leadsStore.fetchOne(leadId)]
+    if (!isAgent.value) {
+      promises.push(usersStore.fetchList({ role: 'agent', per_page: 100 }))
+    }
+    await Promise.all(promises)
+
+    if (isAgent.value) {
+      form.agent_id = auth.user?.id ?? ''
+    } else {
+      agentOptions.value = [
+        { value: '', label: 'Unassigned' },
+        ...usersStore.list.map((u) => ({ value: u.id, label: u.name })),
+      ]
+    }
+  } catch {
+    toast.showError('Failed to load lead')
+    router.replace({ name: 'leads' })
+  }
 })
 
 function validate() {
   errors.value = {}
-  if (!form.lead_id) errors.value.lead_id = 'Lead is required'
   if (!form.scheduled_at) errors.value.scheduled_at = 'Date & time is required'
   return Object.keys(errors.value).length === 0
 }
@@ -57,11 +72,11 @@ async function submit() {
   if (!validate()) return
   try {
     const payload = { ...form }
-    if (!payload.assigned_to) delete payload.assigned_to
+    if (!payload.agent_id) delete payload.agent_id
     if (!payload.notes) delete payload.notes
-    const apt = await store.create(payload)
+    await leadsStore.createLeadAppointment(leadId, payload)
     toast.showSuccess('Appointment created')
-    router.push({ name: 'appointments.detail', params: { id: apt.id } })
+    router.push({ name: 'leads.detail', params: { id: leadId } })
   } catch (e) {
     if (e?.errors) {
       errors.value = Object.fromEntries(
@@ -72,32 +87,40 @@ async function submit() {
     }
   }
 }
+
+function goBack() {
+  router.push({ name: 'leads.detail', params: { id: leadId } })
+}
 </script>
 
 <template>
   <div class="max-w-2xl mx-auto space-y-5">
     <div class="flex items-center gap-3">
-      <AppButton variant="ghost" size="sm" @click="router.back()">
+      <AppButton variant="ghost" size="sm" @click="goBack">
         <template #icon><ArrowLeft class="w-4 h-4" /></template>
-        Back
+        Back to Lead
       </AppButton>
       <div>
         <h1 class="text-xl font-semibold text-gray-900">New Appointment</h1>
-        <p class="text-sm text-gray-500 mt-0.5">Schedule an appointment for a lead.</p>
+        <p v-if="leadFullName" class="text-sm text-gray-500 mt-0.5">for {{ leadFullName }}</p>
       </div>
     </div>
 
-    <AppCard>
+    <AppCard v-if="leadsStore.loading.detail">
+      <div class="space-y-4">
+        <AppSkeleton v-for="n in 4" :key="n" height="44px" />
+      </div>
+    </AppCard>
+
+    <AppCard v-else>
+      <div v-if="leadsStore.current" class="mb-5 p-3 rounded-xl bg-gray-50">
+        <p class="text-sm font-semibold text-gray-900">{{ leadFullName }}</p>
+        <p v-if="leadsStore.current.phone" class="text-xs text-gray-500">{{ leadsStore.current.phone }}</p>
+        <p v-if="leadsStore.current.email" class="text-xs text-gray-500">{{ leadsStore.current.email }}</p>
+      </div>
+
       <form class="space-y-5" @submit.prevent="submit">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <AppSelect
-            v-model="form.lead_id"
-            label="Lead"
-            :options="leadOptions"
-            :error="errors.lead_id"
-            required
-            class="sm:col-span-2"
-          />
           <AppInput
             v-model="form.scheduled_at"
             type="datetime-local"
@@ -110,9 +133,14 @@ async function submit() {
             label="Initial Status"
             :options="APPOINTMENT_STATUS_OPTIONS"
           />
+          <!-- Agents and admins/managers see different things for assignment -->
+          <div v-if="isAgent" class="sm:col-span-2 p-3 rounded-xl bg-gray-50 text-sm text-gray-600">
+            Assigned to: <span class="font-medium text-gray-900">{{ auth.user?.name ?? 'You' }}</span>
+          </div>
           <AppSelect
-            v-model="form.assigned_to"
-            label="Assigned To"
+            v-else
+            v-model="form.agent_id"
+            label="Assign To Agent"
             :options="agentOptions"
             class="sm:col-span-2"
           />
@@ -128,8 +156,8 @@ async function submit() {
         />
 
         <div class="flex items-center justify-end gap-3">
-          <AppButton variant="ghost" type="button" @click="router.back()">Cancel</AppButton>
-          <AppButton type="submit" :loading="store.loading.form">Create Appointment</AppButton>
+          <AppButton variant="ghost" type="button" @click="goBack">Cancel</AppButton>
+          <AppButton type="submit" :loading="leadsStore.loading.form">Create Appointment</AppButton>
         </div>
       </form>
     </AppCard>

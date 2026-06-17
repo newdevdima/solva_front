@@ -3,6 +3,7 @@
     "dashboard": "Dashboard",
     "leads": "Leads",
     "appointments": "Appointments",
+    "calendar": "Calendar",
     "importLeads": "Import Leads",
     "teams": "Teams",
     "users": "Users",
@@ -107,6 +108,8 @@
     "assignSuccess": "Lead assigned successfully",
     "noLeads": "No leads found",
     "noLeadsDesc": "Adjust your filters or create a new lead.",
+    "assign": "Assign",
+    "noteAdded": "Note added",
     "addNote": "Add a note…",
     "submitNote": "Add Note",
     "allStatuses": "All Statuses",
@@ -146,7 +149,20 @@
     "updateSuccess": "Appointment updated",
     "statusUpdated": "Status updated",
     "noAppointments": "No appointments found",
-    "allStatuses": "All Statuses"
+    "allStatuses": "All Statuses",
+    "scheduleNew": "Schedule Appointment",
+    "noScheduled": "No appointments scheduled yet.",
+    "scheduleFirst": "Schedule first appointment"
+  },
+  "calendar": {
+    "agentSubtitle": "Your appointment schedule",
+    "adminSubtitle": "All appointments across agents",
+    "allAgents": "All Agents",
+    "legend": "Legend",
+    "viewDetails": "View Details",
+    "viewLead": "View Lead",
+    "noEvents": "No appointments in this period",
+    "searchPlaceholder": "Search lead name…"
   },
   "teams": {
     "title": "Teams",

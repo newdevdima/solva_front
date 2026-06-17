@@ -22,4 +22,11 @@ export const leadsApi = {
     client.get(`/leads/${id}/status-history`, { params }).then((r) => r.data),
   assignmentHistory: (id, params) =>
     client.get(`/leads/${id}/assignment-history`, { params }).then((r) => r.data),
+
+  appointments: {
+    list: (leadId) =>
+      client.get(`/leads/${leadId}/appointments`).then((r) => r.data),
+    create: (leadId, payload) =>
+      client.post(`/leads/${leadId}/appointments`, payload).then((r) => r.data),
+  },
 }

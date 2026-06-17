@@ -3,6 +3,7 @@
     "dashboard": "Tableau de bord",
     "leads": "Leads",
     "appointments": "Rendez-vous",
+    "calendar": "Calendrier",
     "importLeads": "Importer des leads",
     "teams": "Équipes",
     "users": "Utilisateurs",
@@ -107,6 +108,8 @@
     "assignSuccess": "Lead assigné avec succès",
     "noLeads": "Aucun lead trouvé",
     "noLeadsDesc": "Ajustez vos filtres ou créez un nouveau lead.",
+    "assign": "Assigner",
+    "noteAdded": "Note ajoutée",
     "addNote": "Ajouter une note…",
     "submitNote": "Ajouter la note",
     "allStatuses": "Tous les statuts",
@@ -146,7 +149,20 @@
     "updateSuccess": "Rendez-vous mis à jour",
     "statusUpdated": "Statut mis à jour",
     "noAppointments": "Aucun rendez-vous trouvé",
-    "allStatuses": "Tous les statuts"
+    "allStatuses": "Tous les statuts",
+    "scheduleNew": "Planifier un rendez-vous",
+    "noScheduled": "Aucun rendez-vous planifié.",
+    "scheduleFirst": "Planifier le premier rendez-vous"
+  },
+  "calendar": {
+    "agentSubtitle": "Votre planning de rendez-vous",
+    "adminSubtitle": "Tous les rendez-vous de l'organisation",
+    "allAgents": "Tous les agents",
+    "legend": "Légende",
+    "viewDetails": "Voir les détails",
+    "viewLead": "Voir le lead",
+    "noEvents": "Aucun rendez-vous sur cette période",
+    "searchPlaceholder": "Rechercher un lead…"
   },
   "teams": {
     "title": "Équipes",

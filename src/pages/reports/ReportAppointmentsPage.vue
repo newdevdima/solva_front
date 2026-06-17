@@ -82,7 +82,9 @@ onMounted(() => store.fetchAppointments())
         empty-description="Adjust the date range to load report data."
       >
         <template #cell-lead="{ row }">
-          <span class="text-sm font-medium text-gray-900">{{ row.lead?.name ?? '—' }}</span>
+          <span class="text-sm font-medium text-gray-900">
+            {{ row.lead ? [row.lead.first_name, row.lead.last_name].filter(Boolean).join(' ') || '—' : '—' }}
+          </span>
         </template>
         <template #cell-scheduled_at="{ value }">
           <span class="text-sm text-gray-700">{{ formatDateTime(value) }}</span>
@@ -91,7 +93,7 @@ onMounted(() => store.fetchAppointments())
           <AppointmentStatusBadge :status="value" />
         </template>
         <template #cell-assigned_to="{ row }">
-          <span class="text-sm text-gray-700">{{ row.assigned_to?.name ?? '—' }}</span>
+          <span class="text-sm text-gray-700">{{ row.assigned_agent?.name ?? '—' }}</span>
         </template>
         <template #cell-insurance_type="{ value }">
           <span class="text-xs text-gray-600">{{ value?.replace(/_/g, ' ') ?? '—' }}</span>
