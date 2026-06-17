@@ -254,7 +254,7 @@ onMounted(() => {
             <LineChart
               :data="dash.charts.leads_over_time"
               key-x="date"
-              key-y="count"
+              key-y="total"
               color="#6366f1"
             />
           </template>
@@ -289,7 +289,7 @@ onMounted(() => {
             <BarChart
               :data="dash.charts.appointments_over_time"
               key-x="date"
-              key-y="count"
+              key-y="total"
               color="#6366f1"
             />
           </template>
