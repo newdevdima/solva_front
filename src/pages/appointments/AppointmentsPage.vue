@@ -13,12 +13,11 @@ import AppTable from '@/components/base/AppTable.vue'
 import AppPagination from '@/components/base/AppPagination.vue'
 import AppSearchInput from '@/components/base/AppSearchInput.vue'
 import AppSelect from '@/components/base/AppSelect.vue'
-import AppBadge from '@/components/base/AppBadge.vue'
 import AppAvatar from '@/components/base/AppAvatar.vue'
 import AppInput from '@/components/base/AppInput.vue'
 import AppointmentStatusBadge from '@/components/modules/appointments/AppointmentStatusBadge.vue'
 import { APPOINTMENT_STATUS_OPTIONS } from '@/utils/enums'
-import { formatDateTime, formatDate } from '@/utils/formatters'
+import { formatDateTime } from '@/utils/formatters'
 
 const router = useRouter()
 const store = useAppointmentsStore()
@@ -202,8 +201,8 @@ async function handleDelete(row) {
           <span v-else class="text-gray-400 text-sm">—</span>
         </template>
 
-        <template #cell-insurance_type="{ value }">
-          <span class="text-xs text-gray-600">{{ value?.replace(/_/g, ' ') ?? '—' }}</span>
+        <template #cell-insurance_type="{ row }">
+          <span class="text-xs text-gray-600">{{ row.lead.insurance_type ? row.lead.insurance_type : '—' }}</span>
         </template>
 
         <template #cell-actions="{ row }">
