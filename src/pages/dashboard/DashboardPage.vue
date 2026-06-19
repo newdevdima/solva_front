@@ -51,12 +51,6 @@ const appointments = computed(() => dash.kpis?.appointments ?? null)
 const agents = computed(() => dash.kpis?.agents ?? null)
 const teams = computed(() => dash.kpis?.teams ?? null)
 
-const appointmentSubValue = computed(() => {
-  const a = appointments.value
-  if (!a) return null
-  return `${a.completed ?? 0} ${t('dashboard.completed')} · ${a.scheduled ?? 0} ${t('dashboard.scheduled')}`
-})
-
 /* ── Donut: Leads by Status ────────────────────────────────── */
 const STATUS_COLORS = {
   NRP: '#6B7280',
@@ -189,7 +183,6 @@ onMounted(() => {
         :title="t('dashboard.conversionRate')"
         :value="leads?.conversion_rate"
         format="rate"
-        :sub-value="leads ? `${leads.validated ?? 0} ${t('dashboard.validatedLeads')}` : null"
         :loading="dash.loading.kpis"
         :icon="TrendingUp"
         accent="blue"
@@ -197,7 +190,6 @@ onMounted(() => {
       <KpiCard
         :title="t('dashboard.appointments')"
         :value="appointments?.total"
-        :sub-value="appointmentSubValue"
         :loading="dash.loading.kpis"
         :icon="CalendarCheck"
         accent="amber"
