@@ -2,7 +2,7 @@
 import { onMounted, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { Plus, Filter, X } from 'lucide-vue-next'
+import { Plus, Filter, X, Pencil, Trash2 } from 'lucide-vue-next'
 import { useUsersStore } from '@/stores/users.store'
 import { useUiStore } from '@/stores/ui.store'
 import { useToast } from '@/composables/useToast'
@@ -124,7 +124,7 @@ async function handleDelete(user) {
           <div class="flex items-end">
             <AppButton
               v-if="store.filters.role || store.filters.is_active"
-              variant="ghost"
+              variant="danger"
               size="sm"
               class="w-full"
               @click="store.resetFilters()"
@@ -180,21 +180,20 @@ async function handleDelete(user) {
 
         <template #cell-actions="{ row }">
           <div class="flex items-center justify-end gap-1" @click.stop>
-            <AppButton
-              variant="ghost"
-              size="sm"
+            <button
+              :title="t('common.edit')"
+              class="p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-primary-light transition-colors"
               @click="router.push({ name: 'users.edit', params: { id: row.id } })"
             >
-              {{ t('common.edit') }}
-            </AppButton>
-            <AppButton
-              variant="ghost"
-              size="sm"
-              class="!text-danger hover:!bg-danger-bg"
+              <Pencil class="w-3.5 h-3.5" />
+            </button>
+            <button
+              :title="t('common.delete')"
+              class="p-1.5 rounded-lg text-gray-400 hover:text-danger hover:bg-danger-bg transition-colors"
               @click="handleDelete(row)"
             >
-              {{ t('common.delete') }}
-            </AppButton>
+              <Trash2 class="w-3.5 h-3.5" />
+            </button>
           </div>
         </template>
       </AppTable>

@@ -1,6 +1,6 @@
 <script setup>
-import { onMounted, computed } from 'vue'
-import { Download, TrendingUp } from 'lucide-vue-next'
+import { onMounted } from 'vue'
+import { Download, TrendingUp, X } from 'lucide-vue-next'
 import { useReportsStore } from '@/stores/reports.store'
 import AppCard from '@/components/base/AppCard.vue'
 import AppButton from '@/components/base/AppButton.vue'
@@ -54,28 +54,39 @@ function changeGroupBy(val) {
 
     <!-- Controls -->
     <AppCard padding="sm">
-      <div class="flex items-center gap-2 flex-wrap">
-        <AppSelect
-          :model-value="store.filters.group_by"
-          :options="GROUP_BY_OPTIONS"
-          class="w-44"
-          @update:model-value="changeGroupBy"
-        />
-        <span class="text-gray-300">|</span>
-        <span class="text-sm text-gray-500">Date range:</span>
-        <AppInput
-          :model-value="store.filters.from"
-          type="date"
-          class="w-36"
-          @update:model-value="(v) => { store.setFilter('from', v); store.fetchConversion() }"
-        />
-        <span class="text-gray-400 text-sm">–</span>
-        <AppInput
-          :model-value="store.filters.to"
-          type="date"
-          class="w-36"
-          @update:model-value="(v) => { store.setFilter('to', v); store.fetchConversion() }"
-        />
+      <div class="flex items-center gap-2 flex-wrap justify-between">
+        <div class="flex items-center gap-2 flex-wrap">
+          <AppSelect
+            :model-value="store.filters.group_by"
+            :options="GROUP_BY_OPTIONS"
+            class="w-44"
+            @update:model-value="changeGroupBy"
+          />
+          <span class="text-gray-300">|</span>
+          <span class="text-sm text-gray-500">Date range:</span>
+          <AppInput
+            :model-value="store.filters.from"
+            type="date"
+            class="w-36"
+            @update:model-value="(v) => { store.setFilter('from', v); store.fetchConversion() }"
+          />
+          <span class="text-gray-400 text-sm">–</span>
+          <AppInput
+            :model-value="store.filters.to"
+            type="date"
+            class="w-36"
+            @update:model-value="(v) => { store.setFilter('to', v); store.fetchConversion() }"
+          />
+        </div>
+        <AppButton
+          v-if="store.activeFiltersCount"
+          variant="danger"
+          size="sm"
+          @click="store.resetFilters(); store.fetchConversion()"
+        >
+          <template #icon><X class="w-3.5 h-3.5" /></template>
+          Clear
+        </AppButton>
       </div>
     </AppCard>
 

@@ -1,16 +1,15 @@
 <script setup>
 import { onMounted, computed } from 'vue'
-import { Download } from 'lucide-vue-next'
+import { Download, X } from 'lucide-vue-next'
 import { useReportsStore } from '@/stores/reports.store'
 import AppCard from '@/components/base/AppCard.vue'
 import AppButton from '@/components/base/AppButton.vue'
 import AppTable from '@/components/base/AppTable.vue'
 import AppPagination from '@/components/base/AppPagination.vue'
 import AppInput from '@/components/base/AppInput.vue'
-import AppSkeleton from '@/components/base/AppSkeleton.vue'
 import AppAvatar from '@/components/base/AppAvatar.vue'
 import LeadStatusBadge from '@/components/modules/leads/LeadStatusBadge.vue'
-import { formatDate, formatNumber } from '@/utils/formatters'
+import { formatDate } from '@/utils/formatters'
 
 const store = useReportsStore()
 
@@ -69,21 +68,32 @@ function exportCsv() {
 
     <!-- Date range controls -->
     <AppCard padding="sm">
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-sm text-gray-500">Date range:</span>
-        <AppInput
-          :model-value="store.filters.from"
-          type="date"
-          class="w-36"
-          @update:model-value="(v) => { store.setFilter('from', v); store.fetchLeads() }"
-        />
-        <span class="text-gray-400 text-sm">–</span>
-        <AppInput
-          :model-value="store.filters.to"
-          type="date"
-          class="w-36"
-          @update:model-value="(v) => { store.setFilter('to', v); store.fetchLeads() }"
-        />
+      <div class="flex items-center gap-2 flex-wrap justify-between">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-sm text-gray-500">Date range:</span>
+          <AppInput
+            :model-value="store.filters.from"
+            type="date"
+            class="w-36"
+            @update:model-value="(v) => { store.setFilter('from', v); store.fetchLeads() }"
+          />
+          <span class="text-gray-400 text-sm">–</span>
+          <AppInput
+            :model-value="store.filters.to"
+            type="date"
+            class="w-36"
+            @update:model-value="(v) => { store.setFilter('to', v); store.fetchLeads() }"
+          />
+        </div>
+        <AppButton
+          v-if="store.activeFiltersCount"
+          variant="danger"
+          size="sm"
+          @click="store.resetFilters(); store.fetchLeads()"
+        >
+          <template #icon><X class="w-3.5 h-3.5" /></template>
+          Clear
+        </AppButton>
       </div>
     </AppCard>
 

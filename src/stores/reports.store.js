@@ -1,4 +1,4 @@
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { reportsApi } from '@/api/reports'
 
@@ -28,6 +28,8 @@ export const useReportsStore = defineStore('reports', () => {
   })
 
   const errors = ref(null)
+
+  const activeFiltersCount = computed(() => [filters.from, filters.to].filter(Boolean).length)
 
   async function fetchLeads() {
     loading.leads = true
@@ -104,6 +106,16 @@ export const useReportsStore = defineStore('reports', () => {
     if (key !== 'page') filters.page = 1
   }
 
+  function resetFilters() {
+    Object.assign(filters, {
+      from: '',
+      to: '',
+      group_by: 'source',
+      page: 1,
+      per_page: 25,
+    })
+  }
+
   function _buildParams() {
     const p = {}
     Object.entries(filters).forEach(([k, v]) => {
@@ -142,12 +154,14 @@ export const useReportsStore = defineStore('reports', () => {
     filters,
     loading,
     errors,
+    activeFiltersCount,
     fetchLeads,
     fetchAppointments,
     fetchTeams,
     fetchAgents,
     fetchConversion,
     setFilter,
+    resetFilters,
     exportCsv,
   }
 })

@@ -1,7 +1,8 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { Plus, Users, TrendingUp } from 'lucide-vue-next'
+import { useI18n } from 'vue-i18n'
+import { Plus, Users, TrendingUp, Pencil, Trash2 } from 'lucide-vue-next'
 import { useTeamsStore } from '@/stores/teams.store'
 import { useUiStore } from '@/stores/ui.store'
 import { useToast } from '@/composables/useToast'
@@ -15,6 +16,7 @@ import AppSkeleton from '@/components/base/AppSkeleton.vue'
 import AppPagination from '@/components/base/AppPagination.vue'
 
 const router = useRouter()
+const { t } = useI18n()
 const store = useTeamsStore()
 const ui = useUiStore()
 const toast = useToast()
@@ -157,13 +159,20 @@ async function handleDelete(team) {
             </div>
           </div>
           <div class="flex gap-1 shrink-0" @click.stop>
-            <AppButton variant="ghost" size="sm" @click="openEdit(team)">Edit</AppButton>
-            <AppButton
-              variant="ghost"
-              size="sm"
-              class="!text-danger"
+            <button
+              :title="t('common.edit')"
+              class="p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-primary-light transition-colors"
+              @click="openEdit(team)"
+            >
+              <Pencil class="w-3.5 h-3.5" />
+            </button>
+            <button
+              :title="t('common.delete')"
+              class="p-1.5 rounded-lg text-gray-400 hover:text-danger hover:bg-danger-bg transition-colors"
               @click="handleDelete(team)"
-            >Delete</AppButton>
+            >
+              <Trash2 class="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
       </AppCard>

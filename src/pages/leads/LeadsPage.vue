@@ -2,7 +2,7 @@
 import { onMounted, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { Plus, Filter, X, UserCircle } from 'lucide-vue-next'
+import { Plus, Filter, X, UserCircle, Pencil, Trash2 } from 'lucide-vue-next'
 import { useLeadsStore } from '@/stores/leads.store'
 import { useLeadSourcesStore } from '@/stores/leadSources.store'
 import { useUiStore } from '@/stores/ui.store'
@@ -15,8 +15,6 @@ import AppPagination from '@/components/base/AppPagination.vue'
 import AppSearchInput from '@/components/base/AppSearchInput.vue'
 import AppSelect from '@/components/base/AppSelect.vue'
 import AppAvatar from '@/components/base/AppAvatar.vue'
-import AppBadge from '@/components/base/AppBadge.vue'
-import LeadStatusBadge from '@/components/modules/leads/LeadStatusBadge.vue'
 import LeadStatusDropdown from '@/components/modules/leads/LeadStatusDropdown.vue'
 import { LEAD_STATUS_OPTIONS, INSURANCE_TYPE_OPTIONS } from '@/utils/enums'
 import { formatDate } from '@/utils/formatters'
@@ -167,7 +165,7 @@ const to = computed(() =>
           <div class="flex items-end">
             <AppButton
               v-if="leadsStore.activeFiltersCount"
-              variant="ghost"
+              variant="danger"
               size="sm"
               class="w-full"
               @click="leadsStore.resetFilters()"
@@ -243,23 +241,22 @@ const to = computed(() =>
 
         <template #cell-actions="{ row }">
           <div class="flex items-center justify-end gap-1" @click.stop>
-            <AppButton
+            <button
               v-if="auth.can('LEADS_UPDATE')"
-              variant="ghost"
-              size="sm"
+              :title="t('common.edit')"
+              class="p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-primary-light transition-colors"
               @click="router.push({ name: 'leads.edit', params: { id: row.id } })"
             >
-              {{ t('common.edit') }}
-            </AppButton>
-            <AppButton
+              <Pencil class="w-3.5 h-3.5" />
+            </button>
+            <button
               v-if="auth.can('LEADS_DELETE')"
-              variant="ghost"
-              size="sm"
-              class="!text-danger hover:!bg-danger-bg"
+              :title="t('common.delete')"
+              class="p-1.5 rounded-lg text-gray-400 hover:text-danger hover:bg-danger-bg transition-colors"
               @click="handleDelete(row)"
             >
-              {{ t('common.delete') }}
-            </AppButton>
+              <Trash2 class="w-3.5 h-3.5" />
+            </button>
           </div>
         </template>
       </AppTable>

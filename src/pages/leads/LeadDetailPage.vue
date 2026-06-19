@@ -2,7 +2,7 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { ArrowLeft, Edit2, Trash2, UserPlus, Plus, Calendar } from 'lucide-vue-next'
+import { ArrowLeft, Edit2, Trash2, UserPlus, Plus, Calendar, Pencil } from 'lucide-vue-next'
 import { useLeadsStore } from '@/stores/leads.store'
 import { useAppointmentsStore } from '@/stores/appointments.store'
 import { useUiStore } from '@/stores/ui.store'
@@ -12,6 +12,7 @@ import AppCard from '@/components/base/AppCard.vue'
 import AppButton from '@/components/base/AppButton.vue'
 import AppAvatar from '@/components/base/AppAvatar.vue'
 import AppSkeleton from '@/components/base/AppSkeleton.vue'
+import AppSpinner from '@/components/base/AppSpinner.vue'
 import LeadStatusDropdown from '@/components/modules/leads/LeadStatusDropdown.vue'
 import LeadAssignModal from '@/components/modules/leads/LeadAssignModal.vue'
 import LeadNotesFeed from '@/components/modules/leads/LeadNotesFeed.vue'
@@ -318,24 +319,24 @@ async function handleDelete() {
                 <p v-if="apt.notes" class="text-xs text-gray-400 mt-1 line-clamp-2">{{ apt.notes }}</p>
               </div>
               <div class="flex items-center gap-1 shrink-0">
-                <AppButton
+                <button
                   v-if="auth.can('APPOINTMENTS_UPDATE')"
-                  variant="ghost"
-                  size="sm"
+                  :title="t('common.edit')"
+                  class="p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-primary-light transition-colors"
                   @click="router.push({ name: 'appointments.edit', params: { id: apt.id } })"
                 >
-                  {{ t('common.edit') }}
-                </AppButton>
-                <AppButton
+                  <Pencil class="w-3.5 h-3.5" />
+                </button>
+                <button
                   v-if="auth.can('APPOINTMENTS_DELETE')"
-                  variant="ghost"
-                  size="sm"
-                  class="!text-danger hover:!bg-danger-bg"
-                  :loading="aptActionId === apt.id"
+                  :title="t('common.delete')"
+                  :disabled="aptActionId === apt.id"
+                  class="p-1.5 rounded-lg text-gray-400 hover:text-danger hover:bg-danger-bg transition-colors disabled:opacity-50"
                   @click="onAptDelete(apt)"
                 >
-                  {{ t('common.delete') }}
-                </AppButton>
+                  <AppSpinner v-if="aptActionId === apt.id" :size="14" />
+                  <Trash2 v-else class="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
           </div>

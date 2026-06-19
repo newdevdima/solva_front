@@ -2,7 +2,7 @@
 import { onMounted, computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { Filter, X, Calendar } from 'lucide-vue-next'
+import { Filter, X, Calendar, Pencil, Trash2 } from 'lucide-vue-next'
 import { useAppointmentsStore } from '@/stores/appointments.store'
 import { useUiStore } from '@/stores/ui.store'
 import { useAuthStore } from '@/stores/auth.store'
@@ -145,7 +145,7 @@ async function handleDelete(row) {
           <div class="flex items-end">
             <AppButton
               v-if="store.activeFiltersCount"
-              variant="ghost"
+              variant="danger"
               size="sm"
               class="w-full"
               @click="store.resetFilters()"
@@ -207,23 +207,22 @@ async function handleDelete(row) {
 
         <template #cell-actions="{ row }">
           <div class="flex items-center justify-end gap-1" @click.stop>
-            <AppButton
+            <button
               v-if="auth.can('APPOINTMENTS_UPDATE')"
-              variant="ghost"
-              size="sm"
+              :title="t('common.edit')"
+              class="p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-primary-light transition-colors"
               @click="router.push({ name: 'appointments.edit', params: { id: row.id } })"
             >
-              Edit
-            </AppButton>
-            <AppButton
+              <Pencil class="w-3.5 h-3.5" />
+            </button>
+            <button
               v-if="auth.can('APPOINTMENTS_DELETE')"
-              variant="ghost"
-              size="sm"
-              class="!text-danger hover:!bg-danger-bg"
+              :title="t('common.delete')"
+              class="p-1.5 rounded-lg text-gray-400 hover:text-danger hover:bg-danger-bg transition-colors"
               @click="handleDelete(row)"
             >
-              Delete
-            </AppButton>
+              <Trash2 class="w-3.5 h-3.5" />
+            </button>
           </div>
         </template>
       </AppTable>
