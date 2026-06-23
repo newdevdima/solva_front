@@ -9,7 +9,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const charts = ref(null)
   const revenue = ref(null)
 
-  const filters = reactive({ days: 30, from: null, to: null })
+  const filters = reactive({ days: 30, from: null, to: null, team_id: null, agent_id: null })
 
   const loading = reactive({
     kpis: false,
@@ -20,8 +20,12 @@ export const useDashboardStore = defineStore('dashboard', () => {
   })
 
   function _params() {
-    if (filters.from && filters.to) return { from: filters.from, to: filters.to }
-    return { days: filters.days ?? 30 }
+    const base = filters.from && filters.to
+      ? { from: filters.from, to: filters.to }
+      : { days: filters.days ?? 30 }
+    if (filters.team_id) base.team_id = filters.team_id
+    if (filters.agent_id) base.agent_id = filters.agent_id
+    return base
   }
 
   async function fetchKpis() {
@@ -82,6 +86,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
       filters.to = null
     } else if (key === 'from' || key === 'to') {
       filters.days = null
+    } else if (key === 'team_id') {
+      filters.agent_id = null
     }
     fetchAll()
   }

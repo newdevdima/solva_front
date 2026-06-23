@@ -1,9 +1,9 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   Users, UserPlus, TrendingUp, CalendarCheck, BarChart2,
-  UserCheck, Building2, AlertCircle, Banknote, CircleDollarSign, Receipt, CheckCircle2,
+  UserCheck, Building2, AlertCircle, Banknote, CircleDollarSign, Receipt, CheckCircle2, Filter,
 } from 'lucide-vue-next'
 
 import { useAuthStore } from '@/stores/auth.store'
@@ -16,9 +16,11 @@ import AppSkeleton from '@/components/base/AppSkeleton.vue'
 import AppSpinner from '@/components/base/AppSpinner.vue'
 import AppProgressBar from '@/components/base/AppProgressBar.vue'
 import AppBadge from '@/components/base/AppBadge.vue'
+import AppButton from '@/components/base/AppButton.vue'
 
 import KpiCard from '@/components/modules/dashboard/KpiCard.vue'
 import DashboardDateFilter from '@/components/modules/dashboard/DashboardDateFilter.vue'
+import DashboardFilterPanel from '@/components/modules/dashboard/DashboardFilterPanel.vue'
 
 import LineChart from '@/components/charts/LineChart.vue'
 import BarChart from '@/components/charts/BarChart.vue'
@@ -48,6 +50,21 @@ const filterModel = computed({
     }
   },
 })
+
+/* ── Team / Agent filters ──────────────────────────────────── */
+const showTeamAgentFilters = computed(() => canViewGlobal.value || canViewTeam.value)
+const showFilterPanel = ref(false)
+const fixedTeamId = computed(() => (!canViewGlobal.value && canViewTeam.value) ? auth.user?.team_id : null)
+const activeTeamAgentCount = computed(
+  () => (dash.filters.team_id ? 1 : 0) + (dash.filters.agent_id ? 1 : 0),
+)
+
+function onTeamIdUpdate(v) {
+  dash.setFilter('team_id', v)
+}
+function onAgentIdUpdate(v) {
+  dash.setFilter('agent_id', v)
+}
 
 /* ── KPI derived values ────────────────────────────────────── */
 const leads = computed(() => dash.kpis?.leads ?? null)
@@ -199,8 +216,44 @@ onMounted(() => {
             {{ t('dashboard.welcome') }} <span class="font-semibold text-white">{{ auth.user?.name }}</span>
           </p>
         </div>
-        <DashboardDateFilter v-model="filterModel" />
+        <div class="flex items-center gap-2 flex-wrap">
+          <DashboardDateFilter v-model="filterModel" />
+          <AppButton
+            v-if="showTeamAgentFilters"
+            variant="secondary"
+            size="sm"
+            class="!bg-white !text-primary hover:!bg-indigo-50"
+            @click="showFilterPanel = !showFilterPanel"
+          >
+            <template #icon><Filter class="w-4 h-4" /></template>
+            {{ t('dashboard.filters') }}
+            <span
+              v-if="activeTeamAgentCount"
+              class="ml-1 inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary text-white text-[10px] font-bold"
+            >{{ activeTeamAgentCount }}</span>
+          </AppButton>
+        </div>
       </div>
+
+      <Transition
+        enter-active-class="transition-all duration-200 ease-out"
+        enter-from-class="opacity-0 -translate-y-2"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition-all duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-2"
+      >
+        <div v-if="showFilterPanel && showTeamAgentFilters" class="relative z-10 mt-4 pt-4 border-t border-white/15">
+          <DashboardFilterPanel
+            :team-id="dash.filters.team_id"
+            :agent-id="dash.filters.agent_id"
+            :show-team-select="canViewGlobal"
+            :fixed-team-id="fixedTeamId"
+            @update:team-id="onTeamIdUpdate"
+            @update:agent-id="onAgentIdUpdate"
+          />
+        </div>
+      </Transition>
     </div>
 
     <!-- ── Row 1: KPI cards ─────────────────────────────────── -->
