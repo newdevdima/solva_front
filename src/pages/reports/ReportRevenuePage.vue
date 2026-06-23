@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Download, X, Banknote, CircleDollarSign, Receipt, CheckCircle2 } from 'lucide-vue-next'
 import { useReportsStore } from '@/stores/reports.store'
 import { useAuthStore } from '@/stores/auth.store'
@@ -16,6 +17,7 @@ import PaymentStatusBadge from '@/components/modules/payments/PaymentStatusBadge
 import { PAYMENT_STATUS_OPTIONS } from '@/utils/enums'
 import { formatCurrency, formatDate } from '@/utils/formatters'
 
+const { t } = useI18n()
 const store = useReportsStore()
 const auth = useAuthStore()
 
@@ -29,15 +31,15 @@ const collectionRate = computed(() => {
   return Math.min(100, (summary.value.total_received / summary.value.total_expected) * 100)
 })
 
-const CSV_COLUMNS = [
-  { key: 'name', label: 'Lead' },
-  { key: 'expected_revenue', label: 'CA Attendu' },
-  { key: 'total_received', label: 'Reçu' },
-  { key: 'remaining_amount', label: 'Restant' },
-  { key: 'payment_status_label', label: 'Statut' },
-  { key: 'payments_count', label: 'Paiements' },
-  { key: 'validated_at', label: 'Date validation' },
-]
+const CSV_COLUMNS = computed(() => [
+  { key: 'name', label: t('revenue.csvLead') },
+  { key: 'expected_revenue', label: t('revenue.csvExpected') },
+  { key: 'total_received', label: t('revenue.csvReceived') },
+  { key: 'remaining_amount', label: t('revenue.csvRemaining') },
+  { key: 'payment_status_label', label: t('revenue.csvStatus') },
+  { key: 'payments_count', label: t('revenue.csvPayments') },
+  { key: 'validated_at', label: t('revenue.csvValidatedAt') },
+])
 
 function csvRows() {
   return store.revenueData.map((r) => ({
@@ -76,8 +78,8 @@ onMounted(() => refresh())
       <div class="pointer-events-none absolute -bottom-10 -right-20 w-56 h-56 rounded-full bg-white/5" />
       <div class="relative z-10 flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 class="text-2xl font-bold text-white">Rapport Chiffre d'Affaires</h1>
-          <p class="text-sm text-indigo-200 mt-0.5">Suivi du CA et des paiements par lead validé</p>
+          <h1 class="text-2xl font-bold text-white">{{ t('revenue.title') }}</h1>
+          <p class="text-sm text-indigo-200 mt-0.5">{{ t('revenue.subtitle') }}</p>
         </div>
         <AppButton
           size="sm"
@@ -85,7 +87,7 @@ onMounted(() => refresh())
           @click="store.exportCsv(csvRows(), CSV_COLUMNS, 'revenue-report.csv')"
         >
           <template #icon><Download class="w-4 h-4" /></template>
-          Export CSV
+          {{ t('common.export') }}
         </AppButton>
       </div>
     </div>
@@ -93,7 +95,7 @@ onMounted(() => refresh())
     <!-- Summary KPI cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
       <KpiCard
-        title="CA Attendu"
+        :title="t('revenue.expectedRevenue')"
         :value="summary?.total_expected"
         format="currency"
         :loading="store.loading.revenue"
@@ -101,7 +103,7 @@ onMounted(() => refresh())
         accent="indigo"
       />
       <KpiCard
-        title="CA Reçu"
+        :title="t('revenue.receivedRevenue')"
         :value="summary?.total_received"
         format="currency"
         :loading="store.loading.revenue"
@@ -109,7 +111,7 @@ onMounted(() => refresh())
         accent="emerald"
       />
       <KpiCard
-        title="CA Restant"
+        :title="t('revenue.remainingRevenue')"
         :value="summary?.total_remaining"
         format="currency"
         :loading="store.loading.revenue"
@@ -117,9 +119,9 @@ onMounted(() => refresh())
         accent="amber"
       />
       <KpiCard
-        title="Entièrement payés"
+        :title="t('revenue.fullyPaid')"
         :value="summary?.fully_paid"
-        :sub-value="summary ? `${summary.leads_count} leads validés` : null"
+        :sub-value="summary ? `${summary.leads_count} ${t('revenue.validatedLeads')}` : null"
         :loading="store.loading.revenue"
         :icon="CheckCircle2"
         accent="emerald"
@@ -129,7 +131,7 @@ onMounted(() => refresh())
     <!-- Collection rate -->
     <AppCard v-if="summary" padding="sm">
       <div class="flex items-center gap-4">
-        <span class="text-sm font-medium text-gray-700 shrink-0">Taux de recouvrement</span>
+        <span class="text-sm font-medium text-gray-700 shrink-0">{{ t('revenue.collectionRate') }}</span>
         <div class="flex-1">
           <AppProgressBar
             :value="collectionRate"
@@ -160,7 +162,7 @@ onMounted(() => refresh())
           />
           <AppSelect
             :model-value="store.filters.payment_status ?? ''"
-            :options="[{ value: '', label: 'Tous les statuts' }, ...PAYMENT_STATUS_OPTIONS]"
+            :options="[{ value: '', label: t('revenue.allStatuses') }, ...PAYMENT_STATUS_OPTIONS]"
             class="w-48"
             @update:model-value="(v) => onFilter('payment_status', v || null)"
           />
@@ -172,7 +174,7 @@ onMounted(() => refresh())
           @click="store.resetFilters(); refresh()"
         >
           <template #icon><X class="w-3.5 h-3.5" /></template>
-          Effacer
+          {{ t('revenue.clearFilters') }}
         </AppButton>
       </div>
     </AppCard>
@@ -183,14 +185,14 @@ onMounted(() => refresh())
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b border-gray-100">
-              <th class="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wide">Lead</th>
-              <th class="px-5 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wide">CA Attendu</th>
-              <th class="px-5 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wide">Reçu</th>
-              <th class="px-5 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wide">Restant</th>
-              <th class="px-5 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wide">Statut</th>
-              <th class="px-5 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wide">Paiements</th>
-              <th class="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wide">Validé le</th>
-              <th v-if="canViewAll || canViewTeam" class="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wide">Agent</th>
+              <th class="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wide">{{ t('revenue.leadCol') }}</th>
+              <th class="px-5 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wide">{{ t('revenue.expectedCol') }}</th>
+              <th class="px-5 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wide">{{ t('revenue.receivedCol') }}</th>
+              <th class="px-5 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wide">{{ t('revenue.remainingCol') }}</th>
+              <th class="px-5 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wide">{{ t('revenue.statusCol') }}</th>
+              <th class="px-5 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wide">{{ t('revenue.paymentsCol') }}</th>
+              <th class="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wide">{{ t('revenue.validatedAtCol') }}</th>
+              <th v-if="canViewAll || canViewTeam" class="px-5 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wide">{{ t('revenue.agentCol') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -211,7 +213,7 @@ onMounted(() => refresh())
             <!-- Empty state -->
             <tr v-else-if="store.revenueData.length === 0">
               <td :colspan="canViewAll || canViewTeam ? 8 : 7" class="px-5 py-12 text-center text-sm text-gray-400">
-                Aucun lead validé pour cette période.
+                {{ t('revenue.noLeadsForPeriod') }}
               </td>
             </tr>
 

@@ -42,7 +42,10 @@
     "optional": "optional",
     "required": "required",
     "noTeam": "No Team",
-    "noSource": "No Source"
+    "noSource": "No Source",
+    "saveChanges": "Save Changes",
+    "searchPlaceholder": "Search…",
+    "nameRequired": "Name is required"
   },
   "auth": {
     "login": "Sign In",
@@ -79,7 +82,30 @@
     "noDataPeriod": "No data for this period",
     "validatedLeads": "validated leads",
     "completed": "completed",
-    "scheduled": "scheduled"
+    "scheduled": "scheduled",
+    "today": "Today",
+    "days7": "7 days",
+    "days30": "30 days",
+    "days90": "90 days",
+    "expectedRevenue": "Expected Revenue",
+    "receivedRevenue": "Revenue Received",
+    "remainingRevenue": "Revenue Remaining",
+    "fullyPaid": "Fully Paid",
+    "validated": "validated",
+    "paymentStatus": "Payment Status",
+    "paymentStatusSub": "Validated leads breakdown",
+    "paymentMethods": "Payment Methods",
+    "paymentMethodsSub": "By total amount",
+    "noStatusData": "No status data available",
+    "noInsuranceData": "No insurance data available",
+    "noPaymentData": "No data",
+    "noPayments": "No payments",
+    "teamPerformanceSub": "Leads, validation, and appointment completion",
+    "agentPerformanceSub": "Individual agent breakdown",
+    "validatedCol": "Validated",
+    "conversionCol": "Conv.",
+    "revenueTrend": "Revenue Trend",
+    "monthlyEvolution": "Monthly evolution"
   },
   "leads": {
     "title": "Leads",
@@ -149,10 +175,18 @@
     "updateSuccess": "Appointment updated",
     "statusUpdated": "Status updated",
     "noAppointments": "No appointments found",
+    "noAppointmentsDesc": "Adjust filters or create a new appointment.",
     "allStatuses": "All Statuses",
     "scheduleNew": "Schedule Appointment",
     "noScheduled": "No appointments scheduled yet.",
-    "scheduleFirst": "Schedule first appointment"
+    "scheduleFirst": "Schedule first appointment",
+    "searchPlaceholder": "Search lead name…",
+    "fromDate": "From date",
+    "toDate": "To date",
+    "statsTotal": "Total",
+    "statsScheduled": "Scheduled",
+    "statsCompleted": "Completed",
+    "statsCancelled": "Cancelled"
   },
   "calendar": {
     "agentSubtitle": "Your appointment schedule",
@@ -193,7 +227,12 @@
     "addMemberFailed": "Failed to add member",
     "removeMemberFailed": "Failed to remove member",
     "removeMemberTitle": "Remove Member",
-    "removeMemberConfirm": "Remove {name} from this team?"
+    "removeMemberConfirm": "Remove {name} from this team?",
+    "searchPlaceholder": "Search teams…",
+    "deleteConfirmMsg": "Delete \"{name}\"? Members will be unassigned.",
+    "descriptionOptional": "Description (optional)",
+    "descriptionPlaceholder": "What is this team responsible for?",
+    "namePlaceholder": "e.g. Sales Team Alpha"
   },
   "users": {
     "title": "Users",
@@ -240,7 +279,12 @@
     "deleteSuccess": "Source deleted",
     "createSuccess": "Source created",
     "updateSuccess": "Source updated",
-    "noSources": "No sources yet."
+    "noSources": "No sources yet.",
+    "noSourcesAdd": "No lead sources yet. Add your first source.",
+    "searchPlaceholder": "Search sources…",
+    "deleteConfirmMsg": "Delete \"{name}\"? Leads will lose this source.",
+    "descriptionOptional": "Description (optional)",
+    "namePlaceholder": "e.g. Google Ads, Facebook, Referral…"
   },
   "imports": {
     "title": "Lead Imports",
@@ -274,6 +318,34 @@
     "groupBy": "Group by",
     "noData": "No data",
     "adjustDate": "Adjust the date range to load report data."
+  },
+  "revenue": {
+    "title": "Revenue Report",
+    "subtitle": "Revenue and payment tracking by validated lead",
+    "expectedRevenue": "Expected Revenue",
+    "receivedRevenue": "Revenue Received",
+    "remainingRevenue": "Revenue Remaining",
+    "fullyPaid": "Fully Paid",
+    "validatedLeads": "validated leads",
+    "collectionRate": "Collection Rate",
+    "allStatuses": "All statuses",
+    "clearFilters": "Clear",
+    "leadCol": "Lead",
+    "expectedCol": "Expected",
+    "receivedCol": "Received",
+    "remainingCol": "Remaining",
+    "statusCol": "Status",
+    "paymentsCol": "Payments",
+    "validatedAtCol": "Validated on",
+    "agentCol": "Agent",
+    "noLeadsForPeriod": "No validated leads for this period.",
+    "csvLead": "Lead",
+    "csvExpected": "Expected Revenue",
+    "csvReceived": "Received",
+    "csvRemaining": "Remaining",
+    "csvStatus": "Status",
+    "csvPayments": "Payments",
+    "csvValidatedAt": "Validation Date"
   },
   "profile": {
     "title": "My Profile",

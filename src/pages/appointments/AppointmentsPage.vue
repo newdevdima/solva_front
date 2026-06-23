@@ -92,19 +92,19 @@ async function handleDelete(row) {
     <div v-if="store.stats" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
       <AppCard padding="sm" class="text-center">
         <p class="text-2xl font-bold text-gray-900">{{ store.stats.total ?? 0 }}</p>
-        <p class="text-xs text-gray-500 mt-0.5">Total</p>
+        <p class="text-xs text-gray-500 mt-0.5">{{ t('appointments.statsTotal') }}</p>
       </AppCard>
       <AppCard padding="sm" class="text-center">
         <p class="text-2xl font-bold text-info">{{ store.stats.by_status.PLANIFIE ?? 0 }}</p>
-        <p class="text-xs text-gray-500 mt-0.5">Scheduled</p>
+        <p class="text-xs text-gray-500 mt-0.5">{{ t('appointments.statsScheduled') }}</p>
       </AppCard>
       <AppCard padding="sm" class="text-center">
         <p class="text-2xl font-bold text-success">{{ store.stats.by_status.REALISE ?? 0 }}</p>
-        <p class="text-xs text-gray-500 mt-0.5">Completed</p>
+        <p class="text-xs text-gray-500 mt-0.5">{{ t('appointments.statsCompleted') }}</p>
       </AppCard>
       <AppCard padding="sm" class="text-center">
         <p class="text-2xl font-bold text-danger">{{ store.stats.by_status.ANNULE ?? 0 }}</p>
-        <p class="text-xs text-gray-500 mt-0.5">Cancelled</p>
+        <p class="text-xs text-gray-500 mt-0.5">{{ t('appointments.statsCancelled') }}</p>
       </AppCard>
     </div>
 
@@ -112,7 +112,7 @@ async function handleDelete(row) {
     <AppCard padding="sm" class="space-y-3">
       <AppSearchInput
         :model-value="store.filters.search"
-        placeholder="Search lead name…"
+        :placeholder="t('appointments.searchPlaceholder')"
         @update:model-value="store.setFilter('search', $event)"
       />
       <Transition
@@ -132,13 +132,13 @@ async function handleDelete(row) {
           <AppInput
             :model-value="store.filters.from"
             type="date"
-            placeholder="From date"
+            :placeholder="t('appointments.fromDate')"
             @update:model-value="store.setFilter('from', $event)"
           />
           <AppInput
             :model-value="store.filters.to"
             type="date"
-            placeholder="To date"
+            :placeholder="t('appointments.toDate')"
             @update:model-value="store.setFilter('to', $event)"
           />
           <div class="flex items-end">
@@ -150,7 +150,7 @@ async function handleDelete(row) {
               @click="store.resetFilters()"
             >
               <template #icon><X class="w-3.5 h-3.5" /></template>
-              Clear
+              {{ t('common.clear') }}
             </AppButton>
           </div>
         </div>
@@ -166,8 +166,8 @@ async function handleDelete(row) {
         :sort-key="store.filters.sort_by"
         :sort-dir="store.filters.sort_dir"
         row-key="id"
-        empty-title="No appointments found"
-        empty-description="Adjust filters or create a new appointment."
+        :empty-title="t('appointments.noAppointments')"
+        :empty-description="t('appointments.noAppointmentsDesc')"
         @sort="({ key, dir }) => { store.filters.sort_by = key; store.filters.sort_dir = dir; store.fetchList() }"
         @row-click="(row) => router.push({ name: 'appointments.detail', params: { id: row.id } })"
       >

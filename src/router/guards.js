@@ -29,7 +29,6 @@ export function registerGuards(router) {
 
       // boot resolved but user is still null → response shape mismatch
       if (!auth.user) {
-        console.error('[CRM guard] boot resolved but auth.user is still null — check the /auth/me response in the Network tab')
         return { name: 'login' }
       }
     }

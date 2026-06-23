@@ -42,7 +42,10 @@
     "optional": "optionnel",
     "required": "obligatoire",
     "noTeam": "Sans équipe",
-    "noSource": "Sans source"
+    "noSource": "Sans source",
+    "saveChanges": "Enregistrer",
+    "searchPlaceholder": "Rechercher…",
+    "nameRequired": "Le nom est obligatoire"
   },
   "auth": {
     "login": "Se connecter",
@@ -79,7 +82,30 @@
     "noDataPeriod": "Aucune donnée pour cette période",
     "validatedLeads": "leads validés",
     "completed": "réalisés",
-    "scheduled": "planifiés"
+    "scheduled": "planifiés",
+    "today": "Aujourd'hui",
+    "days7": "7 jours",
+    "days30": "30 jours",
+    "days90": "90 jours",
+    "expectedRevenue": "CA Attendu",
+    "receivedRevenue": "CA Reçu",
+    "remainingRevenue": "CA Restant",
+    "fullyPaid": "Entièrement payés",
+    "validated": "validés",
+    "paymentStatus": "Statut de paiement",
+    "paymentStatusSub": "Répartition des leads validés",
+    "paymentMethods": "Méthodes de paiement",
+    "paymentMethodsSub": "Par montant total",
+    "noStatusData": "Aucune donnée de statut",
+    "noInsuranceData": "Aucune donnée d'assurance",
+    "noPaymentData": "Aucune donnée",
+    "noPayments": "Aucun paiement",
+    "teamPerformanceSub": "Leads, validation et réalisation des rendez-vous",
+    "agentPerformanceSub": "Détail par agent",
+    "validatedCol": "Validés",
+    "conversionCol": "Conv.",
+    "revenueTrend": "Tendance du chiffre d'affaires",
+    "monthlyEvolution": "Évolution mensuelle"
   },
   "leads": {
     "title": "Leads",
@@ -149,10 +175,18 @@
     "updateSuccess": "Rendez-vous mis à jour",
     "statusUpdated": "Statut mis à jour",
     "noAppointments": "Aucun rendez-vous trouvé",
+    "noAppointmentsDesc": "Ajustez les filtres ou créez un nouveau rendez-vous.",
     "allStatuses": "Tous les statuts",
     "scheduleNew": "Planifier un rendez-vous",
     "noScheduled": "Aucun rendez-vous planifié.",
-    "scheduleFirst": "Planifier le premier rendez-vous"
+    "scheduleFirst": "Planifier le premier rendez-vous",
+    "searchPlaceholder": "Rechercher un lead…",
+    "fromDate": "Date début",
+    "toDate": "Date fin",
+    "statsTotal": "Total",
+    "statsScheduled": "Planifiés",
+    "statsCompleted": "Réalisés",
+    "statsCancelled": "Annulés"
   },
   "calendar": {
     "agentSubtitle": "Votre planning de rendez-vous",
@@ -193,7 +227,12 @@
     "addMemberFailed": "Échec de l'ajout du membre",
     "removeMemberFailed": "Échec du retrait du membre",
     "removeMemberTitle": "Retirer le membre",
-    "removeMemberConfirm": "Retirer {name} de cette équipe ?"
+    "removeMemberConfirm": "Retirer {name} de cette équipe ?",
+    "searchPlaceholder": "Rechercher une équipe…",
+    "deleteConfirmMsg": "Supprimer « {name} » ? Les membres seront désassignés.",
+    "descriptionOptional": "Description (optionnel)",
+    "descriptionPlaceholder": "Quelle est la mission de cette équipe ?",
+    "namePlaceholder": "ex. Équipe Vente Alpha"
   },
   "users": {
     "title": "Utilisateurs",
@@ -240,7 +279,12 @@
     "deleteSuccess": "Source supprimée",
     "createSuccess": "Source créée",
     "updateSuccess": "Source mise à jour",
-    "noSources": "Aucune source."
+    "noSources": "Aucune source.",
+    "noSourcesAdd": "Aucune source de leads. Ajoutez votre première source.",
+    "searchPlaceholder": "Rechercher une source…",
+    "deleteConfirmMsg": "Supprimer « {name} » ? Les leads perdront cette source.",
+    "descriptionOptional": "Description (optionnel)",
+    "namePlaceholder": "ex. Google Ads, Facebook, Parrainage…"
   },
   "imports": {
     "title": "Importation de leads",
@@ -274,6 +318,34 @@
     "groupBy": "Regrouper par",
     "noData": "Aucune donnée",
     "adjustDate": "Ajustez la période pour charger les données du rapport."
+  },
+  "revenue": {
+    "title": "Rapport Chiffre d'Affaires",
+    "subtitle": "Suivi du CA et des paiements par lead validé",
+    "expectedRevenue": "CA Attendu",
+    "receivedRevenue": "CA Reçu",
+    "remainingRevenue": "CA Restant",
+    "fullyPaid": "Entièrement payés",
+    "validatedLeads": "leads validés",
+    "collectionRate": "Taux de recouvrement",
+    "allStatuses": "Tous les statuts",
+    "clearFilters": "Effacer",
+    "leadCol": "Lead",
+    "expectedCol": "CA Attendu",
+    "receivedCol": "Reçu",
+    "remainingCol": "Restant",
+    "statusCol": "Statut",
+    "paymentsCol": "Paiements",
+    "validatedAtCol": "Validé le",
+    "agentCol": "Agent",
+    "noLeadsForPeriod": "Aucun lead validé pour cette période.",
+    "csvLead": "Lead",
+    "csvExpected": "CA Attendu",
+    "csvReceived": "Reçu",
+    "csvRemaining": "Restant",
+    "csvStatus": "Statut",
+    "csvPayments": "Paiements",
+    "csvValidatedAt": "Date validation"
   },
   "profile": {
     "title": "Mon profil",

@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Plus, Pencil, Trash2, Link } from 'lucide-vue-next'
 import { useLeadSourcesStore } from '@/stores/leadSources.store'
 import { useUiStore } from '@/stores/ui.store'
@@ -12,6 +13,7 @@ import AppTextarea from '@/components/base/AppTextarea.vue'
 import AppSearchInput from '@/components/base/AppSearchInput.vue'
 import AppSkeleton from '@/components/base/AppSkeleton.vue'
 
+const { t } = useI18n()
 const store = useLeadSourcesStore()
 const ui = useUiStore()
 const toast = useToast()
@@ -39,7 +41,7 @@ function openEdit(source) {
 
 function validate() {
   formErrors.value = {}
-  if (!form.value.name.trim()) formErrors.value.name = 'Name is required'
+  if (!form.value.name.trim()) formErrors.value.name = t('common.nameRequired')
   return Object.keys(formErrors.value).length === 0
 }
 
@@ -48,10 +50,10 @@ async function submit() {
   try {
     if (editing.value) {
       await store.update(editing.value.id, form.value)
-      toast.showSuccess('Source updated')
+      toast.showSuccess(t('leadSources.updateSuccess'))
     } else {
       await store.create(form.value)
-      toast.showSuccess('Source created')
+      toast.showSuccess(t('leadSources.createSuccess'))
     }
     showModal.value = false
   } catch (e) {
@@ -60,19 +62,19 @@ async function submit() {
         Object.entries(e.errors).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v]),
       )
     } else {
-      toast.showError(e?.message ?? 'Failed to save source')
+      toast.showError(e?.message ?? t('common.noData'))
     }
   }
 }
 
 async function handleDelete(source) {
-  const ok = await ui.confirm('Delete Source', `Delete "${source.name}"? Leads will lose this source.`)
+  const ok = await ui.confirm(t('leadSources.deleteTitle'), t('leadSources.deleteConfirmMsg', { name: source.name }))
   if (!ok) return
   try {
     await store.remove(source.id)
-    toast.showSuccess('Source deleted')
+    toast.showSuccess(t('leadSources.deleteSuccess'))
   } catch (e) {
-    toast.showError(e?.message ?? 'Failed to delete source')
+    toast.showError(e?.message ?? t('common.noData'))
   }
 }
 </script>
@@ -85,12 +87,12 @@ async function handleDelete(source) {
       <div class="pointer-events-none absolute -bottom-10 -right-20 w-56 h-56 rounded-full bg-white/5" />
       <div class="relative z-10 flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 class="text-2xl font-bold text-white">Lead Sources</h1>
-          <p class="text-sm text-indigo-200 mt-0.5">{{ store.list.length }} sources configured</p>
+          <h1 class="text-2xl font-bold text-white">{{ t('leadSources.title') }}</h1>
+          <p class="text-sm text-indigo-200 mt-0.5">{{ store.list.length }} {{ t('leadSources.total') }}</p>
         </div>
         <AppButton size="sm" class="!bg-white !text-primary hover:!bg-indigo-50" @click="openCreate">
           <template #icon><Plus class="w-4 h-4" /></template>
-          New Source
+          {{ t('leadSources.newSource') }}
         </AppButton>
       </div>
     </div>
@@ -99,7 +101,7 @@ async function handleDelete(source) {
     <AppCard padding="sm">
       <AppSearchInput
         :model-value="store.filters.search"
-        placeholder="Search sources…"
+        :placeholder="t('leadSources.searchPlaceholder')"
         @update:model-value="store.setFilter('search', $event)"
       />
     </AppCard>
@@ -115,7 +117,7 @@ async function handleDelete(source) {
 
     <div v-else-if="store.list.length === 0" class="text-center py-16">
       <Link class="w-8 h-8 text-gray-300 mx-auto mb-3" />
-      <p class="text-sm text-gray-400">No lead sources yet. Add your first source.</p>
+      <p class="text-sm text-gray-400">{{ t('leadSources.noSourcesAdd') }}</p>
     </div>
 
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -135,18 +137,20 @@ async function handleDelete(source) {
               {{ source.description }}
             </p>
             <p v-if="source.leads_count !== undefined" class="text-xs text-gray-400 mt-1">
-              {{ source.leads_count }} leads
+              {{ source.leads_count }} {{ t('teams.leads') }}
             </p>
           </div>
         </div>
         <div class="flex gap-1 shrink-0">
           <button
+            :title="t('common.edit')"
             class="p-1.5 rounded-lg text-gray-400 hover:text-primary hover:bg-primary-light transition-colors"
             @click="openEdit(source)"
           >
             <Pencil class="w-3.5 h-3.5" />
           </button>
           <button
+            :title="t('common.delete')"
             class="p-1.5 rounded-lg text-gray-400 hover:text-danger hover:bg-danger-bg transition-colors"
             @click="handleDelete(source)"
           >
@@ -159,28 +163,28 @@ async function handleDelete(source) {
     <!-- Modal -->
     <AppModal
       :open="showModal"
-      :title="editing ? 'Edit Source' : 'New Source'"
+      :title="editing ? t('leadSources.name') : t('leadSources.newSource')"
       size="sm"
       @close="showModal = false"
     >
       <form class="space-y-4" @submit.prevent="submit">
         <AppInput
           v-model="form.name"
-          label="Source Name"
-          placeholder="e.g. Google Ads, Facebook, Referral…"
+          :label="t('leadSources.name')"
+          :placeholder="t('leadSources.namePlaceholder')"
           :error="formErrors.name"
           required
         />
         <AppTextarea
           v-model="form.description"
-          label="Description (optional)"
+          :label="t('leadSources.descriptionOptional')"
           :rows="2"
         />
       </form>
       <template #footer>
-        <AppButton variant="ghost" @click="showModal = false">Cancel</AppButton>
+        <AppButton variant="ghost" @click="showModal = false">{{ t('common.cancel') }}</AppButton>
         <AppButton :loading="store.loading.form" @click="submit">
-          {{ editing ? 'Save' : 'Create' }}
+          {{ editing ? t('common.save') : t('common.create') }}
         </AppButton>
       </template>
     </AppModal>

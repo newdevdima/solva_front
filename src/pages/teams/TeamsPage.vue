@@ -49,7 +49,7 @@ function openEdit(team) {
 
 function validate() {
   formErrors.value = {}
-  if (!form.value.name.trim()) formErrors.value.name = 'Name is required'
+  if (!form.value.name.trim()) formErrors.value.name = t('common.nameRequired')
   return Object.keys(formErrors.value).length === 0
 }
 
@@ -58,10 +58,10 @@ async function submit() {
   try {
     if (editingTeam.value) {
       await store.update(editingTeam.value.id, form.value)
-      toast.showSuccess('Team updated')
+      toast.showSuccess(t('teams.updateSuccess'))
     } else {
       await store.create(form.value)
-      toast.showSuccess('Team created')
+      toast.showSuccess(t('teams.createSuccess'))
     }
     showCreateModal.value = false
   } catch (e) {
@@ -70,19 +70,19 @@ async function submit() {
         Object.entries(e.errors).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v]),
       )
     } else {
-      toast.showError(e?.message ?? 'Failed to save team')
+      toast.showError(e?.message ?? t('teams.addMemberFailed'))
     }
   }
 }
 
 async function handleDelete(team) {
-  const ok = await ui.confirm('Delete Team', `Delete "${team.name}"? Members will be unassigned.`)
+  const ok = await ui.confirm(t('teams.deleteTitle'), t('teams.deleteConfirmMsg', { name: team.name }))
   if (!ok) return
   try {
     await store.remove(team.id)
-    toast.showSuccess('Team deleted')
+    toast.showSuccess(t('teams.deleteSuccess'))
   } catch (e) {
-    toast.showError(e?.message ?? 'Failed to delete team')
+    toast.showError(e?.message ?? t('teams.removeMemberFailed'))
   }
 }
 </script>
@@ -95,12 +95,12 @@ async function handleDelete(team) {
       <div class="pointer-events-none absolute -bottom-10 -right-20 w-56 h-56 rounded-full bg-white/5" />
       <div class="relative z-10 flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 class="text-2xl font-bold text-white">Teams</h1>
-          <p class="text-sm text-indigo-200 mt-0.5">{{ store.meta.total }} teams configured</p>
+          <h1 class="text-2xl font-bold text-white">{{ t('teams.title') }}</h1>
+          <p class="text-sm text-indigo-200 mt-0.5">{{ store.meta.total }} {{ t('teams.total') }}</p>
         </div>
         <AppButton size="sm" class="!bg-white !text-primary hover:!bg-indigo-50" @click="openCreate">
           <template #icon><Plus class="w-4 h-4" /></template>
-          New Team
+          {{ t('teams.newTeam') }}
         </AppButton>
       </div>
     </div>
@@ -109,7 +109,7 @@ async function handleDelete(team) {
     <AppCard padding="sm">
       <AppSearchInput
         :model-value="store.filters.search"
-        placeholder="Search teams…"
+        :placeholder="t('teams.searchPlaceholder')"
         @update:model-value="store.setFilter('search', $event)"
       />
     </AppCard>
@@ -127,7 +127,7 @@ async function handleDelete(team) {
 
     <div v-else-if="store.list.length === 0" class="text-center py-16">
       <Users class="w-10 h-10 text-gray-300 mx-auto mb-3" />
-      <p class="text-sm text-gray-500">No teams yet. Create your first team.</p>
+      <p class="text-sm text-gray-500">{{ t('teams.noTeams') }}</p>
     </div>
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -150,10 +150,10 @@ async function handleDelete(team) {
               </p>
               <div class="flex items-center gap-3 mt-2">
                 <span class="text-xs text-gray-500">
-                  {{ team.members_count ?? 0 }} members
+                  {{ team.members_count ?? 0 }} {{ t('teams.members') }}
                 </span>
                 <span v-if="team.leads_count !== undefined" class="text-xs text-gray-500">
-                  {{ team.leads_count }} leads
+                  {{ team.leads_count }} {{ t('teams.leads') }}
                 </span>
               </div>
             </div>
@@ -194,29 +194,29 @@ async function handleDelete(team) {
     <!-- Create / Edit Modal -->
     <AppModal
       :open="showCreateModal"
-      :title="editingTeam ? 'Edit Team' : 'New Team'"
+      :title="editingTeam ? t('teams.editTeam') : t('teams.newTeam')"
       size="sm"
       @close="showCreateModal = false"
     >
       <form class="space-y-4" @submit.prevent="submit">
         <AppInput
           v-model="form.name"
-          label="Team Name"
-          placeholder="e.g. Sales Team Alpha"
+          :label="t('teams.name')"
+          :placeholder="t('teams.namePlaceholder')"
           :error="formErrors.name"
           required
         />
         <AppTextarea
           v-model="form.description"
-          label="Description (optional)"
-          placeholder="What is this team responsible for?"
+          :label="t('teams.descriptionOptional')"
+          :placeholder="t('teams.descriptionPlaceholder')"
           :rows="3"
         />
       </form>
       <template #footer>
-        <AppButton variant="ghost" @click="showCreateModal = false">Cancel</AppButton>
+        <AppButton variant="ghost" @click="showCreateModal = false">{{ t('common.cancel') }}</AppButton>
         <AppButton :loading="store.loading.form" @click="submit">
-          {{ editingTeam ? 'Save Changes' : 'Create Team' }}
+          {{ editingTeam ? t('common.saveChanges') : t('teams.newTeam') }}
         </AppButton>
       </template>
     </AppModal>

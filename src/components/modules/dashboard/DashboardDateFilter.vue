@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { CalendarDays } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -9,13 +10,14 @@ const props = defineProps({
   },
 })
 const emit = defineEmits(['update:modelValue'])
+const { t } = useI18n()
 
-const presets = [
-  { label: 'Today', days: 1 },
-  { label: '7 days', days: 7 },
-  { label: '30 days', days: 30 },
-  { label: '90 days', days: 90 },
-]
+const presets = computed(() => [
+  { label: t('dashboard.today'), days: 1 },
+  { label: t('dashboard.days7'), days: 7 },
+  { label: t('dashboard.days30'), days: 30 },
+  { label: t('dashboard.days90'), days: 90 },
+])
 
 const activePreset = computed(() =>
   props.modelValue.from ? null : (props.modelValue.days ?? 30),

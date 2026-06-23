@@ -10,7 +10,6 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!token.value)
 
   function can(permission) {
-    console.log('permission passed ', permission)
     return user.value?.permissions?.includes(permission) ?? false
   }
 
@@ -95,8 +94,6 @@ export const useAuthStore = defineStore('auth', () => {
     booting.value = true
     try {
       const response = await authApi.me()
-      console.log('[CRM auth] /me response:', JSON.stringify(response))
-      // Accept both { data: user } and { user } shapes, then normalize permissions
       user.value = _normalizeUser(response?.data ?? response?.user ?? response)
       return true
     } finally {

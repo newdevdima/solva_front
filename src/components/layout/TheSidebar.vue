@@ -51,7 +51,7 @@ const reportSubItems = computed(() => {
     )
   }
   if (canViewRevenue.value) {
-    items.push({ label: 'Chiffre d\'affaires', to: '/reports/revenue', icon: Banknote })
+    items.push({ label: t('revenue.title'), to: '/reports/revenue', icon: Banknote })
   }
   return items
 })

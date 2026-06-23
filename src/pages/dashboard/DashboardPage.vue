@@ -156,15 +156,15 @@ const agentRows = computed(() => dash.aggregations?.by_agent ?? [])
 const teamColumns = computed(() => [
   { key: 'team_name', label: t('teams.name') },
   { key: 'leads_total', label: t('leads.title'), align: 'right' },
-  { key: 'leads_validated', label: 'Validés', align: 'right' },
+  { key: 'leads_validated', label: t('dashboard.validatedCol'), align: 'right' },
   { key: 'appointments_completed', label: t('appointments.title'), align: 'right' },
-  { key: '_conversion', label: 'Conv.', align: 'right' },
+  { key: '_conversion', label: t('dashboard.conversionCol'), align: 'right' },
 ])
 
 const agentColumns = computed(() => [
-  { key: 'agent_name', label: 'Agent' },
+  { key: 'agent_name', label: t('appointments.agent') },
   { key: 'leads_total', label: t('leads.title'), align: 'right' },
-  { key: 'leads_validated', label: 'Validés', align: 'right' },
+  { key: 'leads_validated', label: t('dashboard.validatedCol'), align: 'right' },
   { key: 'appointments_completed', label: t('appointments.title'), align: 'right' },
 ])
 
@@ -265,7 +265,7 @@ onMounted(() => {
     <template v-if="canViewRevenue">
       <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <KpiCard
-          title="CA Attendu"
+          :title="t('dashboard.expectedRevenue')"
           :value="revenueKpis?.total_expected"
           format="currency"
           :loading="dash.loading.revenue"
@@ -273,7 +273,7 @@ onMounted(() => {
           accent="indigo"
         />
         <KpiCard
-          title="CA Reçu"
+          :title="t('dashboard.receivedRevenue')"
           :value="revenueKpis?.total_received"
           format="currency"
           :loading="dash.loading.revenue"
@@ -281,7 +281,7 @@ onMounted(() => {
           accent="emerald"
         />
         <KpiCard
-          title="CA Restant"
+          :title="t('dashboard.remainingRevenue')"
           :value="revenueKpis?.total_remaining"
           format="currency"
           :loading="dash.loading.revenue"
@@ -289,9 +289,9 @@ onMounted(() => {
           accent="amber"
         />
         <KpiCard
-          title="Entièrement payés"
+          :title="t('dashboard.fullyPaid')"
           :value="revenueKpis?.fully_paid"
-          :sub-value="revenueKpis ? `${revenueKpis.validated_leads} validés` : null"
+          :sub-value="revenueKpis ? `${revenueKpis.validated_leads} ${t('dashboard.validated')}` : null"
           :loading="dash.loading.revenue"
           :icon="CheckCircle2"
           accent="emerald"
@@ -339,8 +339,8 @@ onMounted(() => {
         <AppCard>
           <div class="flex items-center justify-between mb-5">
             <div>
-              <h3 class="font-semibold text-gray-900">Statut de paiement</h3>
-              <p class="text-xs text-gray-400 mt-0.5">Répartition des leads validés</p>
+              <h3 class="font-semibold text-gray-900">{{ t('dashboard.paymentStatus') }}</h3>
+              <p class="text-xs text-gray-400 mt-0.5">{{ t('dashboard.paymentStatusSub') }}</p>
             </div>
           </div>
           <template v-if="dash.loading.revenue">
@@ -357,7 +357,7 @@ onMounted(() => {
           <template v-else>
             <div class="flex items-center justify-center py-10 text-gray-400">
               <AlertCircle class="w-5 h-5 mr-2 opacity-60" />
-              <span class="text-sm">Aucune donnée</span>
+              <span class="text-sm">{{ t('dashboard.noPaymentData') }}</span>
             </div>
           </template>
         </AppCard>
@@ -366,8 +366,8 @@ onMounted(() => {
         <AppCard>
           <div class="flex items-center justify-between mb-5">
             <div>
-              <h3 class="font-semibold text-gray-900">Méthodes de paiement</h3>
-              <p class="text-xs text-gray-400 mt-0.5">Par montant total</p>
+              <h3 class="font-semibold text-gray-900">{{ t('dashboard.paymentMethods') }}</h3>
+              <p class="text-xs text-gray-400 mt-0.5">{{ t('dashboard.paymentMethodsSub') }}</p>
             </div>
           </div>
           <template v-if="dash.loading.revenue">
@@ -384,7 +384,7 @@ onMounted(() => {
           <template v-else>
             <div class="flex items-center justify-center py-10 text-gray-400">
               <AlertCircle class="w-5 h-5 mr-2 opacity-60" />
-              <span class="text-sm">Aucun paiement</span>
+              <span class="text-sm">{{ t('dashboard.noPayments') }}</span>
             </div>
           </template>
         </AppCard>
@@ -492,7 +492,7 @@ onMounted(() => {
         <template v-else>
           <div class="flex items-center justify-center py-10 text-gray-400">
             <AlertCircle class="w-5 h-5 mr-2 opacity-60" />
-            <span class="text-sm">No status data available</span>
+            <span class="text-sm">{{ t('dashboard.noStatusData') }}</span>
           </div>
         </template>
       </AppCard>
@@ -539,7 +539,7 @@ onMounted(() => {
         <template v-else>
           <div class="flex items-center justify-center py-10 text-gray-400">
             <AlertCircle class="w-5 h-5 mr-2 opacity-60" />
-            <span class="text-sm">No insurance data available</span>
+            <span class="text-sm">{{ t('dashboard.noInsuranceData') }}</span>
           </div>
         </template>
       </AppCard>
@@ -580,7 +580,7 @@ onMounted(() => {
         <div class="px-5 pt-5 pb-4 flex items-center justify-between border-b border-gray-100">
           <div>
             <h3 class="font-semibold text-gray-900">{{ t('dashboard.performanceByTeam') }}</h3>
-            <p class="text-xs text-gray-400 mt-0.5">Leads, validation, and appointment completion</p>
+            <p class="text-xs text-gray-400 mt-0.5">{{ t('dashboard.teamPerformanceSub') }}</p>
           </div>
           <AppBadge
             v-if="teamRows.length"
@@ -660,7 +660,7 @@ onMounted(() => {
         <div class="px-5 pt-5 pb-4 flex items-center justify-between border-b border-gray-100">
           <div>
             <h3 class="font-semibold text-gray-900">{{ t('dashboard.performanceByAgent') }}</h3>
-            <p class="text-xs text-gray-400 mt-0.5">Individual agent breakdown</p>
+            <p class="text-xs text-gray-400 mt-0.5">{{ t('dashboard.agentPerformanceSub') }}</p>
           </div>
           <AppBadge
             v-if="agentRows.length"
