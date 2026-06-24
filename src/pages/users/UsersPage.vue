@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Plus, Filter, X, Pencil, Trash2 } from 'lucide-vue-next'
 import { useUsersStore } from '@/stores/users.store'
+import { useTeamsStore } from '@/stores/teams.store'
 import { useUiStore } from '@/stores/ui.store'
 import { useToast } from '@/composables/useToast'
 import AppCard from '@/components/base/AppCard.vue'
@@ -20,6 +21,7 @@ import { formatDate } from '@/utils/formatters'
 
 const router = useRouter()
 const store = useUsersStore()
+const teamsStore = useTeamsStore()
 const ui = useUiStore()
 const toast = useToast()
 const { t } = useI18n()
@@ -41,13 +43,20 @@ const statusOptions = computed(() => [
   { value: '1', label: t('common.active') },
   { value: '0', label: t('common.inactive') },
 ])
+const teamOptions = computed(() => [
+  { value: '', label: t('users.allTeams') },
+  ...teamsStore.list.map((t) => ({ value: t.id, label: t.name })),
+])
 
 const from = computed(() =>
   store.meta.total === 0 ? 0 : (store.meta.current_page - 1) * store.meta.per_page + 1,
 )
 const to = computed(() => Math.min(store.meta.current_page * store.meta.per_page, store.meta.total))
 
-onMounted(() => store.fetchList())
+onMounted(() => {
+  store.fetchList()
+  teamsStore.fetchList()
+})
 
 async function toggleActive(user) {
   try {
@@ -119,9 +128,14 @@ async function handleDelete(user) {
             :options="statusOptions"
             @update:model-value="store.setFilter('is_active', $event)"
           />
+          <AppSelect
+            :model-value="store.filters.team_id"
+            :options="teamOptions"
+            @update:model-value="store.setFilter('team_id', $event)"
+          />
           <div class="flex items-end">
             <AppButton
-              v-if="store.filters.role || store.filters.is_active"
+              v-if="store.filters.role || store.filters.is_active || store.filters.team_id"
               variant="danger"
               size="sm"
               class="w-full"

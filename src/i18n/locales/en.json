@@ -267,6 +267,7 @@
     "inviteFirst": "Invite the first team member.",
     "allRoles": "All Roles",
     "allStatuses": "All Statuses",
+    "allTeams": "All Teams",
     "roleAndTeam": "Role & Team",
     "accountDetails": "Account Details",
     "statusUpdateFailed": "Failed to update status",

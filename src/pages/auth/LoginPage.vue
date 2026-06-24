@@ -3,13 +3,11 @@ import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth.store'
-import { useUiStore } from '@/stores/ui.store'
 import AppInput from '@/components/base/AppInput.vue'
 import AppButton from '@/components/base/AppButton.vue'
 import { Mail, Lock } from 'lucide-vue-next'
 
 const auth = useAuthStore()
-const ui = useUiStore()
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()

@@ -22,6 +22,9 @@ export const INSURANCE_TYPE = {
   CREDIT_CONSOMMATION: { label: 'Consumer Credit' },
   RACHAT_CREDIT: { label: 'Debt Consolidation' },
   CREDIT_IMMOBILIER: { label: 'Mortgage Credit' },
+  DECENNALE: { label: 'Décennale' },
+  TAXI_VTC: { label: 'Taxi / VTC' },
+  AUTRE: { label: 'Autre' },
 }
 
 export const LEAD_IMPORT_STATUS = {

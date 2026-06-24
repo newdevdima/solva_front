@@ -197,6 +197,7 @@ const to = computed(() =>
     <!-- Table card -->
     <AppCard padding="none">
       <AppTable
+        class="cursor-pointer"
         :columns="COLUMNS"
         :rows="leadsStore.list"
         :loading="leadsStore.loading.list"
