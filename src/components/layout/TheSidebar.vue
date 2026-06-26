@@ -11,6 +11,7 @@ import {
   UsersRound,
   UserCog,
   Tag,
+  FileCog,
   BarChart2,
   TrendingUp,
   Settings,
@@ -77,6 +78,7 @@ const navGroups = computed(() => [
       { icon: UsersRound, label: t('nav.teams'), to: '/teams', permission: 'TEAMS_VIEW' },
       { icon: UserCog, label: t('nav.users'), to: '/users', permission: 'USERS_VIEW' },
       { icon: Tag, label: t('nav.leadSources'), to: '/lead-sources', role: 'super_admin' },
+      { icon: FileCog, label: t('nav.documentRequirements'), to: '/document-requirements', role: 'super_admin' },
     ],
   },
 ])

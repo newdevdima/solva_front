@@ -141,6 +141,14 @@ const router = createRouter({
       meta: { requiresAuth: true, layout: 'dashboard', role: 'super_admin', title: 'Lead Sources' },
     },
 
+    /* Document Requirements */
+    {
+      path: '/document-requirements',
+      name: 'document-requirements',
+      component: () => import('@/pages/document-requirements/DocumentRequirementsPage.vue'),
+      meta: { requiresAuth: true, layout: 'dashboard', role: 'super_admin', title: 'Document Requirements' },
+    },
+
     /* Lead Imports */
     {
       path: '/lead-imports',
