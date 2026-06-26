@@ -73,7 +73,7 @@ function handleKey(e) {
         <AppAvatar :name="note.author?.name ?? 'User'" size="sm" class="shrink-0" />
         <div class="flex-1 min-w-0">
           <div class="flex items-baseline gap-2">
-            <span class="text-sm font-medium text-gray-900">{{ note.author?.name ?? 'Unknown' }}</span>
+            <span class="text-sm font-medium text-gray-900">{{ note.user?.name ?? 'Unknown' }}</span>
             <span class="text-xs text-gray-400">{{ formatRelative(note.created_at) }}</span>
           </div>
           <p class="text-sm text-gray-700 mt-0.5 whitespace-pre-wrap">{{ note.note }}</p>
