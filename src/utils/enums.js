@@ -59,6 +59,22 @@ export const PAYMENT_METHOD = {
   AUTRE: { label: 'Autre' },
 }
 
+export const CLIENT_TYPE = {
+  INDIVIDUAL: { label: 'Particulier' },
+  PROFESSIONAL: { label: 'Professionnel' },
+}
+
+export const DOCUMENT_TYPE = {
+  CARTE_IDENTITE: { label: "Carte d'identité" },
+  PERMIS_CONDUIRE: { label: 'Permis de conduire' },
+  CARTE_GRISE: { label: 'Carte grise' },
+  RIB: { label: 'RIB' },
+  RELEVE_INFORMATION: { label: "Relevé d'information" },
+  EXTRAIT_KBIS: { label: 'Extrait Kbis' },
+  NUMERO_SIRET: { label: 'Numéro SIRET' },
+  CONTRAT_CHANTIER: { label: 'Contrat Chantier' },
+}
+
 /* Dropdown-ready arrays */
 export const LEAD_STATUS_OPTIONS = Object.entries(LEAD_STATUS).map(([value, { label }]) => ({
   value,
@@ -70,6 +86,11 @@ export const APPOINTMENT_STATUS_OPTIONS = Object.entries(APPOINTMENT_STATUS).map
 )
 
 export const INSURANCE_TYPE_OPTIONS = Object.entries(INSURANCE_TYPE).map(([value, { label }]) => ({
+  value,
+  label,
+}))
+
+export const CLIENT_TYPE_OPTIONS = Object.entries(CLIENT_TYPE).map(([value, { label }]) => ({
   value,
   label,
 }))

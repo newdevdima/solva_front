@@ -80,9 +80,6 @@ function handleKey(e) {
         </div>
       </div>
 
-      <p v-if="!loading && notes.length === 0" class="text-sm text-gray-400 text-center py-4">
-        No notes yet. Be the first to add one.
-      </p>
     </div>
   </div>
 </template>

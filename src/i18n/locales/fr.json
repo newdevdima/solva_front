@@ -154,6 +154,7 @@
     "history": {
       "notes": "Notes",
       "history": "Historique",
+      "dossier": "Dossier",
       "details": "Détails",
       "statusChange": "Statut modifié",
       "assigned": "Assigné à",
@@ -403,5 +404,34 @@
     "super_admin": "Super Admin",
     "manager": "Manager",
     "agent": "Agent"
+  },
+  "payments": {
+    "title": "Paiements"
+  },
+  "documents": {
+    "dossier": "Dossier",
+    "documents": "documents",
+    "noDocumentsRequired": "Aucun document requis pour ce type d'assurance.",
+    "uploaded": "Téléversé",
+    "missing": "Manquant",
+    "upload": "Téléverser",
+    "replace": "Remplacer",
+    "download": "Télécharger",
+    "delete": "Supprimer",
+    "remove": "Retirer",
+    "cancel": "Annuler",
+    "clientTypeRequired": "Type de client requis",
+    "clientTypeDescription": "Veuillez sélectionner le type de client pour afficher les documents requis pour ce dossier.",
+    "individual": "Particulier",
+    "professional": "Professionnel",
+    "uploadTitle": "Téléverser : {type}",
+    "dropzoneText": "Glissez-déposez un fichier ici ou",
+    "browse": "parcourir",
+    "dropzoneHint": "PDF, JPG, PNG, WEBP — max 10 Mo",
+    "errorUnsupportedFormat": "Format non supporté. Utilisez PDF, JPG, PNG ou WEBP.",
+    "errorFileTooBig": "Le fichier dépasse la taille maximale de 10 Mo.",
+    "clientTypeUpdated": "Type de client mis à jour",
+    "preview": "Aperçu",
+    "previewUnavailable": "L'aperçu n'est pas disponible pour ce type de fichier."
   }
 }

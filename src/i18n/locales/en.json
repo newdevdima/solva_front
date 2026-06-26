@@ -154,6 +154,7 @@
     "history": {
       "notes": "Notes",
       "history": "History",
+      "dossier": "Documents",
       "details": "Details",
       "statusChange": "Status changed",
       "assigned": "Assigned to",
@@ -403,5 +404,34 @@
     "super_admin": "Super Admin",
     "manager": "Manager",
     "agent": "Agent"
+  },
+  "payments": {
+    "title": "Payments"
+  },
+  "documents": {
+    "dossier": "Documents",
+    "documents": "documents",
+    "noDocumentsRequired": "No documents required for this insurance type.",
+    "uploaded": "Uploaded",
+    "missing": "Missing",
+    "upload": "Upload",
+    "replace": "Replace",
+    "download": "Download",
+    "delete": "Delete",
+    "remove": "Remove",
+    "cancel": "Cancel",
+    "clientTypeRequired": "Client type required",
+    "clientTypeDescription": "Please select the client type to display the required documents for this dossier.",
+    "individual": "Individual",
+    "professional": "Professional",
+    "uploadTitle": "Upload: {type}",
+    "dropzoneText": "Drag and drop a file here or",
+    "browse": "browse",
+    "dropzoneHint": "PDF, JPG, PNG, WEBP — max 10 MB",
+    "errorUnsupportedFormat": "Unsupported format. Use PDF, JPG, PNG or WEBP.",
+    "errorFileTooBig": "File exceeds maximum size of 10 MB.",
+    "clientTypeUpdated": "Client type updated",
+    "preview": "Preview",
+    "previewUnavailable": "Preview is not available for this file type."
   }
 }

@@ -22,7 +22,10 @@ import RevenueCard from '@/components/modules/payments/RevenueCard.vue'
 import RevenuePromptModal from '@/components/modules/payments/RevenuePromptModal.vue'
 import PaymentForm from '@/components/modules/payments/PaymentForm.vue'
 import PaymentList from '@/components/modules/payments/PaymentList.vue'
-import { INSURANCE_TYPE } from '@/utils/enums'
+import DossierTab from '@/components/modules/documents/DossierTab.vue'
+import DocumentPreviewModal from '@/components/modules/documents/DocumentPreviewModal.vue'
+import { documentsApi } from '@/api/documents'
+import { INSURANCE_TYPE, CLIENT_TYPE } from '@/utils/enums'
 import { formatDate, formatDateTime } from '@/utils/formatters'
 
 const route = useRoute()
@@ -44,6 +47,10 @@ const showRevenuePrompt = ref(false)
 const pendingStatus = ref(null)
 const showPaymentForm = ref(false)
 const paymentFormRef = ref(null)
+const updatingClientType = ref(false)
+const previewDoc = ref(null)
+const previewBlobUrl = ref(null)
+const previewLoading = ref(false)
 
 const leadFullName = computed(() => {
   const c = leadsStore.current
@@ -60,8 +67,9 @@ const TABS = computed(() => {
     { key: 'appointments', label: t('nav.appointments') },
   ]
   if (isValidated.value) {
-    tabs.push({ key: 'payments', label: 'Paiements' })
+    tabs.push({ key: 'payments', label: t('payments.title') })
   }
+  tabs.push({ key: 'dossier', label: t('leads.history.dossier') })
   tabs.push({ key: 'info', label: t('leads.history.details') })
   return tabs
 })
@@ -139,6 +147,9 @@ async function onTabChange(tab) {
   if (tab === 'payments') {
     await leadsStore.fetchPayments(id)
   }
+  if (tab === 'dossier') {
+    await leadsStore.fetchDossier(id)
+  }
 }
 
 async function onPaymentSubmit(payload) {
@@ -177,6 +188,67 @@ async function onAptDelete(apt) {
   } finally {
     aptActionId.value = null
   }
+}
+
+async function onDossierUpload(formData) {
+  try {
+    await leadsStore.uploadDocument(id, formData)
+    toast.showSuccess('Document téléversé avec succès')
+  } catch (e) {
+    toast.showError(e?.message ?? 'Échec du téléversement')
+  }
+}
+
+async function onDossierDelete(document) {
+  try {
+    await leadsStore.removeDocument(id, document.id)
+    toast.showSuccess('Document supprimé avec succès')
+  } catch (e) {
+    toast.showError(e?.message ?? 'Échec de la suppression')
+  }
+}
+
+async function onDossierDownload(document) {
+  try {
+    await leadsStore.downloadDocument(id, document.id, document.original_filename)
+  } catch (e) {
+    toast.showError(e?.message ?? 'Échec du téléchargement')
+  }
+}
+
+async function onSetClientType(clientType) {
+  updatingClientType.value = true
+  try {
+    await leadsStore.setClientType(id, clientType)
+    await leadsStore.fetchDossier(id)
+    toast.showSuccess(t('documents.clientTypeUpdated'))
+  } catch (e) {
+    toast.showError(e?.message ?? 'Échec de la mise à jour')
+  } finally {
+    updatingClientType.value = false
+  }
+}
+
+async function onDossierPreview(doc) {
+  previewDoc.value = { ...doc.document, type_label: doc.type_label }
+  previewBlobUrl.value = null
+  previewLoading.value = true
+  try {
+    const response = await documentsApi.download(id, doc.document.id)
+    previewBlobUrl.value = URL.createObjectURL(new Blob([response.data], { type: doc.document.mime_type }))
+  } catch (e) {
+    toast.showError(e?.message ?? 'Failed to load preview')
+  } finally {
+    previewLoading.value = false
+  }
+}
+
+function closePreview() {
+  if (previewBlobUrl.value) {
+    URL.revokeObjectURL(previewBlobUrl.value)
+  }
+  previewDoc.value = null
+  previewBlobUrl.value = null
 }
 
 async function handleDelete() {
@@ -432,6 +504,20 @@ async function handleDelete() {
           />
         </div>
 
+        <!-- Dossier -->
+        <DossierTab
+          v-else-if="activeTab === 'dossier'"
+          :dossier="leadsStore.dossier"
+          :lead-id="id"
+          :loading="leadsStore.loading.dossier"
+          :updating-client-type="updatingClientType"
+          @upload="onDossierUpload"
+          @delete="onDossierDelete"
+          @download="onDossierDownload"
+          @preview="onDossierPreview"
+          @set-client-type="onSetClientType"
+        />
+
         <!-- Details -->
         <div v-else-if="activeTab === 'info'" class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
           <div>
@@ -442,6 +528,12 @@ async function handleDelete() {
             <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">{{ t('leads.insuranceType') }}</p>
             <p class="text-sm text-gray-900">
               {{ INSURANCE_TYPE[leadsStore.current.insurance_type]?.label ?? leadsStore.current.insurance_type ?? '—' }}
+            </p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Type de client</p>
+            <p class="text-sm text-gray-900">
+              {{ CLIENT_TYPE[leadsStore.current.client_type]?.label ?? '—' }}
             </p>
           </div>
           <div>
@@ -481,6 +573,16 @@ async function handleDelete() {
       :loading="leadsStore.loading.payments"
       @close="showPaymentForm = false"
       @submit="onPaymentSubmit"
+    />
+
+    <!-- Document preview modal -->
+    <DocumentPreviewModal
+      :open="!!previewDoc"
+      :document="previewDoc"
+      :blob-url="previewBlobUrl"
+      :loading="previewLoading"
+      @close="closePreview"
+      @download="onDossierDownload(previewDoc); closePreview()"
     />
   </div>
 </template>
