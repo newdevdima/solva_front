@@ -52,7 +52,7 @@ const filterModel = computed({
 })
 
 /* ── Team / Agent filters ──────────────────────────────────── */
-const showTeamAgentFilters = computed(() => canViewGlobal.value || canViewTeam.value)
+const showTeamAgentFilters = computed(() => canViewGlobal.value || (canViewTeam.value && !auth.hasRole('team_leader')))
 const showFilterPanel = ref(false)
 const fixedTeamId = computed(() => (!canViewGlobal.value && canViewTeam.value) ? auth.user?.team_id : null)
 const activeTeamAgentCount = computed(
