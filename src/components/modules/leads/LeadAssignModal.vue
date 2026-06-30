@@ -56,7 +56,10 @@ const filtered = computed(() => {
 })
 
 function confirm() {
-  if (selected.value !== null) emit('assign', selected.value)
+  if (selected.value !== null) {
+    const agent = agents.value.find((a) => a.id === selected.value)
+    emit('assign', selected.value, agent ?? null)
+  }
 }
 </script>
 

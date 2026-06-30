@@ -110,9 +110,16 @@ async function doStatusChange(payload) {
   }
 }
 
-async function onAssign(assignedTo) {
+async function onAssign(assignedTo, agent) {
   try {
     await leadsStore.assign(id, assignedTo)
+    if (agent && leadsStore.current) {
+      leadsStore.current.assigned_agent = {
+        id: agent.id,
+        name: agent.name,
+        email: agent.email,
+      }
+    }
     toast.showSuccess(t('leads.assignSuccess'))
     showAssignModal.value = false
   } catch (e) {

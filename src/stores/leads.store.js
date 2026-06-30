@@ -131,9 +131,9 @@ export const useLeadsStore = defineStore('leads', () => {
     try {
       const { data } = await leadsApi.assign(id, assignedTo)
       const numId = Number(id)
-      if (current.value?.id === numId) Object.assign(current.value, data)
+      if (current.value?.id === numId) current.value = { ...current.value, ...data }
       const idx = list.value.findIndex((l) => l.id === numId)
-      if (idx !== -1) Object.assign(list.value[idx], data)
+      if (idx !== -1) list.value.splice(idx, 1, { ...list.value[idx], ...data })
       return data
     } catch (e) {
       errors.value = e
