@@ -11,7 +11,8 @@ import AppButton from '@/components/base/AppButton.vue'
 import AppInput from '@/components/base/AppInput.vue'
 import AppSelect from '@/components/base/AppSelect.vue'
 import AppSkeleton from '@/components/base/AppSkeleton.vue'
-import { INSURANCE_TYPE_OPTIONS, CLIENT_TYPE_OPTIONS } from '@/utils/enums'
+import { INSURANCE_TYPE, CLIENT_TYPE } from '@/utils/enums'
+import { useEnumOptions } from '@/composables/useEnumOptions'
 
 const route = useRoute()
 const router = useRouter()
@@ -19,6 +20,9 @@ const leadsStore = useLeadsStore()
 const sourcesStore = useLeadSourcesStore()
 const usersStore = useUsersStore()
 const toast = useToast()
+
+const insuranceTypeOptions = useEnumOptions(INSURANCE_TYPE, 'insuranceTypes')
+const clientTypeOptions = useEnumOptions(CLIENT_TYPE, 'clientTypes')
 
 const id = route.params.id
 const form = reactive({
@@ -173,7 +177,7 @@ async function submit() {
             <AppSelect
               v-model="form.insurance_type"
               label="Insurance Type"
-              :options="INSURANCE_TYPE_OPTIONS"
+              :options="insuranceTypeOptions"
               :error="errors.insurance_type"
               required
             />
@@ -181,7 +185,7 @@ async function submit() {
               v-if="showClientType(form.insurance_type)"
               v-model="form.client_type"
               label="Type de client"
-              :options="CLIENT_TYPE_OPTIONS"
+              :options="clientTypeOptions"
               :error="errors.client_type"
             />
             <AppSelect

@@ -9,6 +9,9 @@
     "users": "Users",
     "leadSources": "Lead Sources",
     "documentRequirements": "Document Config",
+    "myAgents": "My Agents",
+    "followUps": "Follow-ups",
+    "team": "Team",
     "reports": "Reports",
     "settings": "Settings",
     "logout": "Logout",
@@ -399,11 +402,46 @@
       "REALISE": "Completed",
       "ANNULE": "Cancelled",
       "REPORTE": "Rescheduled"
+    },
+    "payment": {
+      "NON_PAYE": "Unpaid",
+      "PARTIELLEMENT_PAYE": "Partially Paid",
+      "PAYE": "Paid"
+    },
+    "import": {
+      "PENDING": "Pending",
+      "PROCESSING": "Processing",
+      "COMPLETED": "Completed",
+      "FAILED": "Failed"
     }
+  },
+  "insuranceTypes": {
+    "AUTO": "Auto Insurance",
+    "MOTO": "Motorcycle Insurance",
+    "RC_PRO": "Professional Liability",
+    "MUTUELLE_SANTE": "Health Insurance",
+    "EMPRUNTEUR": "Borrower Insurance",
+    "CREDIT_CONSOMMATION": "Consumer Credit",
+    "RACHAT_CREDIT": "Debt Consolidation",
+    "CREDIT_IMMOBILIER": "Mortgage Credit",
+    "DECENNALE": "Décennale",
+    "TAXI_VTC": "Taxi / VTC",
+    "AUTRE": "Other"
+  },
+  "clientTypes": {
+    "INDIVIDUAL": "Individual",
+    "PROFESSIONAL": "Professional"
+  },
+  "paymentMethods": {
+    "STRIPE": "Stripe",
+    "VIREMENT_BANCAIRE": "Bank Transfer",
+    "PAYMENT_LINK": "Payment Link",
+    "AUTRE": "Other"
   },
   "roles": {
     "super_admin": "Super Admin",
     "manager": "Manager",
+    "team_leader": "Team Leader",
     "agent": "Agent"
   },
   "payments": {
@@ -460,5 +498,26 @@
     "typeDeleted": "Document type deleted",
     "deleteTypeTitle": "Delete Document Type",
     "deleteTypeConfirm": "Delete \"{name}\"? This cannot be undone."
+  },
+  "teamLeader": {
+    "title": "Team Dashboard",
+    "subtitle": "Monitor your team's performance",
+    "agentPerformance": "Agent Performance",
+    "activeLeads": "Active Leads",
+    "validatedLeads": "Validated",
+    "conversionRate": "Conv. %",
+    "scheduledAppts": "Scheduled",
+    "completedAppts": "Completed",
+    "revenue": "Revenue",
+    "followUpAlerts": "Follow-up Alerts",
+    "overdue": "Overdue",
+    "warning": "Warning",
+    "dueToday": "Due Today",
+    "onTrack": "On Track",
+    "viewAllFollowUps": "View All Follow-ups",
+    "noAlerts": "No pending follow-ups",
+    "pendingFollowUps": "Pending Follow-ups",
+    "hoursIdle": "{hours}h idle",
+    "noAgents": "No agents in your team"
   }
 }

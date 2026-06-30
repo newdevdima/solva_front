@@ -19,6 +19,7 @@ import {
   ChevronDown,
   UserCheck,
   Banknote,
+  ClipboardList,
 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUiStore } from '@/stores/ui.store'
@@ -70,6 +71,13 @@ const navGroups = computed(() => [
       { icon: CalendarDays, label: t('nav.appointments'), to: '/appointments', permission: 'APPOINTMENTS_VIEW_*' },
       { icon: CalendarRange, label: t('nav.calendar'), to: '/calendar', permission: 'APPOINTMENTS_VIEW_*' },
       { icon: Upload, label: t('nav.importLeads'), to: '/lead-imports', permission: 'LEADS_IMPORT' },
+    ],
+  },
+  {
+    label: t('nav.team'),
+    items: [
+      { icon: UserCheck, label: t('nav.myAgents'), to: '/my-agents', role: 'team_leader' },
+      { icon: ClipboardList, label: t('nav.followUps'), to: '/follow-ups', role: 'team_leader' },
     ],
   },
   {
@@ -137,8 +145,8 @@ async function handleLogout() {
     <!-- Nav groups -->
     <nav class="flex-1 overflow-y-auto overflow-x-hidden py-4 space-y-0.5 px-3">
       <template v-for="(group, gi) in navGroups" :key="gi">
-        <!-- Group label -->
-        <p v-if="group.label" class="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-widest text-sidebar-icon/60">
+        <!-- Group label (hidden when no items are visible) -->
+        <p v-if="group.label && group.items.some(isVisible)" class="px-3 pt-4 pb-1 text-[10px] font-semibold uppercase tracking-widest text-sidebar-icon/60">
           {{ group.label }}
         </p>
 

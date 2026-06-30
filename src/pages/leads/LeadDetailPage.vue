@@ -25,7 +25,6 @@ import PaymentList from '@/components/modules/payments/PaymentList.vue'
 import DossierTab from '@/components/modules/documents/DossierTab.vue'
 import DocumentPreviewModal from '@/components/modules/documents/DocumentPreviewModal.vue'
 import { documentsApi } from '@/api/documents'
-import { INSURANCE_TYPE, CLIENT_TYPE } from '@/utils/enums'
 import { formatDate, formatDateTime } from '@/utils/formatters'
 
 const route = useRoute()
@@ -305,7 +304,7 @@ async function handleDelete() {
                 @change="onStatusChange"
               />
               <span v-if="leadsStore.current.insurance_type" class="text-xs text-gray-500 font-medium">
-                {{ INSURANCE_TYPE[leadsStore.current.insurance_type]?.label ?? leadsStore.current.insurance_type }}
+                {{ t('insuranceTypes.' + leadsStore.current.insurance_type, leadsStore.current.insurance_type) }}
               </span>
             </div>
           </div>
@@ -527,13 +526,13 @@ async function handleDelete() {
           <div>
             <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">{{ t('leads.insuranceType') }}</p>
             <p class="text-sm text-gray-900">
-              {{ INSURANCE_TYPE[leadsStore.current.insurance_type]?.label ?? leadsStore.current.insurance_type ?? '—' }}
+              {{ leadsStore.current.insurance_type ? t('insuranceTypes.' + leadsStore.current.insurance_type, leadsStore.current.insurance_type) : '—' }}
             </p>
           </div>
           <div>
             <p class="text-xs text-gray-400 uppercase tracking-wide mb-1">Type de client</p>
             <p class="text-sm text-gray-900">
-              {{ CLIENT_TYPE[leadsStore.current.client_type]?.label ?? '—' }}
+              {{ leadsStore.current.client_type ? t('clientTypes.' + leadsStore.current.client_type, leadsStore.current.client_type) : '—' }}
             </p>
           </div>
           <div>
