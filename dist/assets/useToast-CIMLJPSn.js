@@ -1,0 +1,1 @@
+import{S as e}from"./index-RMAcjOnN.js";function t(){let t=e();return{showSuccess:t.showSuccess,showError:t.showError,showWarning:t.showWarning,showInfo:t.showInfo}}export{t};

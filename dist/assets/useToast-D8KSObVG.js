@@ -1,1 +1,0 @@
-import{S as e}from"./index-Cj8fDYQn.js";function t(){let t=e();return{showSuccess:t.showSuccess,showError:t.showError,showWarning:t.showWarning,showInfo:t.showInfo}}export{t};

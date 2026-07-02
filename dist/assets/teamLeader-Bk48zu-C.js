@@ -1,1 +1,0 @@
-import{T as e}from"./index-Cj8fDYQn.js";var t=e=>e.data?.data??e.data,n={agents:()=>e.get(`/team/agents`).then(t),followUps:()=>e.get(`/team/follow-ups`).then(t)};export{n as t};
